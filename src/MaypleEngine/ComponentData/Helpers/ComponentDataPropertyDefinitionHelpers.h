@@ -43,8 +43,8 @@ void COMPONENTNAME##ComponentData::ArbitrarySet##NAME(hndl componentHandle, core
   newValue.Get(val); \
   GET_COMPONENT_DATA(COMPONENTNAME##ComponentData)->Set##NAME(componentHandle, val); \
 } \
-const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
-const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
+const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
+const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
 
 // Declares the get set property functionality for the given vector member
 #define AUTO_GET_SET_PROPERTY_VECTOR(COMPONENTNAME, NAME, CAMELNAME) \
@@ -123,8 +123,8 @@ void COMPONENTNAME##ComponentData::ArbitrarySet##NAME(hndl componentHandle, core
   newValue.Get(val); \
   GET_COMPONENT_DATA(COMPONENTNAME##ComponentData)->Set##NAME(componentHandle, val); \
 } \
-const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
-const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
+const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
+const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
 
 // Declares the get set property functionality for the given matrix member
 #define AUTO_GET_SET_PROPERTY_MATRIX(COMPONENTNAME, NAME, CAMELNAME) \
@@ -148,8 +148,8 @@ void COMPONENTNAME##ComponentData::ArbitrarySet##NAME(hndl componentHandle, core
   newValue.Get(val); \
   GET_COMPONENT_DATA(COMPONENTNAME##ComponentData)->Set##NAME(componentHandle, val); \
 } \
-const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
-const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
+const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
+const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
 
 // Declares the get set property functionality for the given member
 #define AUTO_DYNAMIC_PROPERTY_REG_STRING(COMPONENTNAME, NAME, CAMELNAME) \
@@ -166,8 +166,8 @@ void COMPONENTNAME##ComponentData::ArbitrarySet##NAME(hndl componentHandle, core
   newValue.Get(val); \
   GET_COMPONENT_DATA(COMPONENTNAME##ComponentData)->Set##NAME(componentHandle, val); \
 } \
-const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
-const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
+const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
+const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
 
 
 #define AUTO_GET_SET_PROPERTY_STRING(COMPONENTNAME, NAME, CAMELNAME) \
@@ -195,8 +195,8 @@ void COMPONENTNAME##ComponentData::ArbitrarySet##NAME(hndl componentHandle, core
   newValue.Get(val); \
   GET_COMPONENT_DATA(COMPONENTNAME##ComponentData)->Set##NAME(componentHandle, val); \
 } \
-const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
-const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
+const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitraryGet##NAME); \
+const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter(#COMPONENTNAME, #NAME, COMPONENTNAME##ComponentData::ArbitrarySet##NAME);
 
 // Declares the get set property functionality for the given member
 #define AUTO_GET_SET_PROPERTY(TYPE, COMPONENTNAME, NAME, CAMELNAME) \

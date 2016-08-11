@@ -30,24 +30,24 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 // Specifically for previously made components(Seths)
 // Should use the START_DECLARE_COMPONENT_DEFINITION instead
 #define REGISTER_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
-DECLARE_JOB(CONC(Initialize,COMPONENTNAME,ComponentData)); \
+DECLARE_JOB(CONCATENATE(Initialize,COMPONENTNAME,ComponentData)); \
 namespace \
 { \
-  int32 s_componentIndex = componentSpace::ComponentDataLocator::RegisterComponent(CONC(Initialize,COMPONENTNAME,ComponentData)); \
+  int32 s_componentIndex = componentSpace::ComponentDataLocator::RegisterComponent(CONCATENATE(Initialize,COMPONENTNAME,ComponentData)); \
 } \
-DECLARE_JOB(CONC(Initialize,COMPONENTNAME,ComponentData)) \
+DECLARE_JOB(CONCATENATE(Initialize,COMPONENTNAME,ComponentData)) \
 { \
   START_JOB; \
-  auto *data = (NAMESPACE::CONC(COMPONENTNAME,ComponentData)*)_aligned_malloc(sizeof(NAMESPACE::CONC(COMPONENTNAME,ComponentData)), SIMD_ALIGNMENT); \
-  new (data)NAMESPACE::CONC(COMPONENTNAME,ComponentData)(); \
+  auto *data = (NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)*)_aligned_malloc(sizeof(NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)), SIMD_ALIGNMENT); \
+  new (data)NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)(); \
   data->_PushExecutionNodes(); \
   componentSpace::ComponentDataLocator::SetDataWithIndex(data, s_componentIndex); \
   END_JOB; \
 } \
 template <> \
-NAMESPACE::CONC(COMPONENTNAME,ComponentData) *componentSpace::ComponentDataLocator::GetData<NAMESPACE::CONC(COMPONENTNAME,ComponentData)>() \
+NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData) *componentSpace::ComponentDataLocator::GetData<NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)>() \
 { \
-  return static_cast<NAMESPACE::CONC(COMPONENTNAME,ComponentData) *>(componentSpace::ComponentDataLocator::GetDataWithIndex(s_componentIndex));\
+  return static_cast<NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData) *>(componentSpace::ComponentDataLocator::GetDataWithIndex(s_componentIndex));\
 }
 
 #define SDEF_BIND(NAMESPACE, COMPONENTNAME) \
@@ -124,13 +124,13 @@ SDEF_BIND(NAMESPACE, COMPONENTNAME) \
 namespace NAMESPACE \
 { \
   AUTO_LUAREG_COMPONENT_CLASS(COMPONENTNAME); \
-  extern int CONC(dummy, COMPONENTNAME, AutoReg) = 0; \
-  int CONC(dummy, COMPONENTNAME, AutoReg2) = ++CONC(dummy, COMPONENTNAME, AutoReg); \
-  int CONC(dummy, COMPONENTNAME, StringFn) = scriptSpace::LuaDataManager::RegisterMemberFunc(#COMPONENTNAME, "__tostring", scriptSpace::AddMemberFunction < decltype(&scriptSpace::COMPONENTNAME##Bind::ToString), &scriptSpace::COMPONENTNAME##Bind::ToString > ); \
-  int CONC(dummy, COMPONENTNAME, AttachFn) = scriptSpace::LuaDataManager::RegisterAttachFunc(#COMPONENTNAME, scriptSpace::AddAttachComponent< COMPONENTNAME##ComponentData, decltype(&COMPONENTNAME##ComponentData::AttachComponent), &COMPONENTNAME##ComponentData::AttachComponent > ); \
-  int CONC(dummy, COMPONENTNAME, DetachFn) = scriptSpace::LuaDataManager::RegisterDetachFunc(#COMPONENTNAME, scriptSpace::AddDetachComponent< COMPONENTNAME##ComponentData, decltype(&COMPONENTNAME##ComponentData::DetachComponent), &COMPONENTNAME##ComponentData::DetachComponent > ); \
-  int CONC(dummy, COMPONENTNAME, LuaGetFn) = scriptSpace::LuaDataManager::RegisterLuaComponentFromObject(#COMPONENTNAME, scriptSpace::COMPONENTNAME##Bind::Lua##COMPONENTNAME##FromObject); \
-  int CONC(dummy, COMPONENTNAME, GetComFn) = scriptSpace::LuaDataManager::RegisterGetComponentHandleFunc(#COMPONENTNAME, COMPONENTNAME##ComponentData::GetComponentStatic); \
+  extern int CONCATENATE(dummy, COMPONENTNAME, AutoReg) = 0; \
+  int CONCATENATE(dummy, COMPONENTNAME, AutoReg2) = ++CONCATENATE(dummy, COMPONENTNAME, AutoReg); \
+  int CONCATENATE(dummy, COMPONENTNAME, StringFn) = scriptSpace::LuaDataManager::RegisterMemberFunc(#COMPONENTNAME, "__tostring", scriptSpace::AddMemberFunction < decltype(&scriptSpace::COMPONENTNAME##Bind::ToString), &scriptSpace::COMPONENTNAME##Bind::ToString > ); \
+  int CONCATENATE(dummy, COMPONENTNAME, AttachFn) = scriptSpace::LuaDataManager::RegisterAttachFunc(#COMPONENTNAME, scriptSpace::AddAttachComponent< COMPONENTNAME##ComponentData, decltype(&COMPONENTNAME##ComponentData::AttachComponent), &COMPONENTNAME##ComponentData::AttachComponent > ); \
+  int CONCATENATE(dummy, COMPONENTNAME, DetachFn) = scriptSpace::LuaDataManager::RegisterDetachFunc(#COMPONENTNAME, scriptSpace::AddDetachComponent< COMPONENTNAME##ComponentData, decltype(&COMPONENTNAME##ComponentData::DetachComponent), &COMPONENTNAME##ComponentData::DetachComponent > ); \
+  int CONCATENATE(dummy, COMPONENTNAME, LuaGetFn) = scriptSpace::LuaDataManager::RegisterLuaComponentFromObject(#COMPONENTNAME, scriptSpace::COMPONENTNAME##Bind::Lua##COMPONENTNAME##FromObject); \
+  int CONCATENATE(dummy, COMPONENTNAME, GetComFn) = scriptSpace::LuaDataManager::RegisterGetComponentHandleFunc(#COMPONENTNAME, COMPONENTNAME##ComponentData::GetComponentStatic); \
   hndl COMPONENTNAME##ComponentData::GetComponent(hndl objectHandle) \
   { \
     if (!m_objectToComponentHandle.IsAlive(objectHandle)) \

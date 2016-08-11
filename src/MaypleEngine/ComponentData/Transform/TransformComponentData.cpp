@@ -201,8 +201,8 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     newValue.Get(val);
     GET_COMPONENT_DATA(TransformComponentData)->SetRotation(componentHandle, val);
   }
-  const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "Rotation", TransformComponentData::ArbitraryGetRotation);
-  const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "Rotation", TransformComponentData::ArbitrarySetRotation);
+  const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "Rotation", TransformComponentData::ArbitraryGetRotation);
+  const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "Rotation", TransformComponentData::ArbitrarySetRotation);
 
   //////////////////////////////////////////////////////////////////////////
   // position offset
@@ -249,8 +249,8 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     newValue.Get(val);
     GET_COMPONENT_DATA(TransformComponentData)->SetOffsetPosition(componentHandle, val);
   }
-  // const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetPosition", TransformComponentData::ArbitraryGetOffsetPosition);
-  // const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetPosition", TransformComponentData::ArbitrarySetOffsetPosition);
+  // const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetPosition", TransformComponentData::ArbitraryGetOffsetPosition);
+  // const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetPosition", TransformComponentData::ArbitrarySetOffsetPosition);
 
   //////////////////////////////////////////////////////////////////////////
   // scale offset
@@ -299,8 +299,8 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     newValue.Get(val);
     GET_COMPONENT_DATA(TransformComponentData)->SetOffsetScale(componentHandle, val);
   }
-  // const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetScale", TransformComponentData::ArbitraryGetOffsetScale);
-  // const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetScale", TransformComponentData::ArbitrarySetOffsetScale);
+  // const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetScale", TransformComponentData::ArbitraryGetOffsetScale);
+  // const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetScale", TransformComponentData::ArbitrarySetOffsetScale);
 
   //////////////////////////////////////////////////////////////////////////
   // rotation offset
@@ -347,8 +347,8 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     newValue.Get(val);
     GET_COMPONENT_DATA(TransformComponentData)->SetOffsetRotation(componentHandle, val);
   }
-  // const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetRotation", TransformComponentData::ArbitraryGetOffsetRotation);
-  // const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetRotation", TransformComponentData::ArbitrarySetOffsetRotation);
+  // const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetRotation", TransformComponentData::ArbitraryGetOffsetRotation);
+  // const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetRotation", TransformComponentData::ArbitrarySetOffsetRotation);
 
   //////////////////////////////////////////////////////////////////////////
   // offset helper functions
@@ -474,8 +474,8 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     newValue.Get(val);
     GET_COMPONENT_DATA(TransformComponentData)->SetCFrame(componentHandle, val);
   }
-  const int32 CONC(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "CFrame", TransformComponentData::ArbitraryGetCFrame);
-  const int32 CONC(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "CFrame", TransformComponentData::ArbitrarySetCFrame);
+  const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "CFrame", TransformComponentData::ArbitraryGetCFrame);
+  const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "CFrame", TransformComponentData::ArbitrarySetCFrame);
 
   ////////////////////////////////////////////////////////////////////////// BASIS
   AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, GetExtentScalar);

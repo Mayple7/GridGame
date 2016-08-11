@@ -28,13 +28,13 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 *       Macros
 */
 // Stat Declare helper macros
-#define SDECL_FORWARD \
+#define FORWARD_DECLARE_COMPONENT \
 namespace componentSpace \
 { \
   struct ComponentData; \
 } 
 
-#define SDECL_COMPONENT_BIND(COMPONENTNAME) \
+#define BIND_COMPONENT(COMPONENTNAME) \
 namespace scriptSpace \
 { \
   class COMPONENTNAME##Bind : public BaseBind \
@@ -58,12 +58,12 @@ void _UnmapObjectToMultiComponentHandle(int32 componentHandle); \
 
 // Declares the declaration part of a component
 #define START_DECLARE_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
-SDECL_FORWARD \
-SDECL_COMPONENT_BIND(COMPONENTNAME) \
+FORWARD_DECLARE_COMPONENT \
+BIND_COMPONENT(COMPONENTNAME) \
 namespace NAMESPACE \
 { \
   void Initialize##COMPONENTNAME##ComponentData(); \
-  extern int CONC(dummy, COMPONENTNAME, AutoReg); \
+  extern int CONCATENATE(dummy, COMPONENTNAME, AutoReg); \
   void Construct##COMPONENTNAME(); \
   void Destruct##COMPONENTNAME(); \
   struct COMPONENTNAME##ComponentData \
@@ -76,7 +76,7 @@ namespace NAMESPACE \
     hndl GetComponent(hndl objectHandle); \
     hndl GetObject(hndl componentHandle); \
     static hndl GetComponentStatic(hndl objectHandle); \
-    static void AddToObjectStatic(CONC(COMPONENTNAME, ComponentData) *CAMELCOMPONENTNAME##Data, hndl objectHandle, hndl componentHandle); \
+    static void AddToObjectStatic(CONCATENATE(COMPONENTNAME, ComponentData) *CAMELCOMPONENTNAME##Data, hndl objectHandle, hndl componentHandle); \
     static int32 GetNumberOf##COMPONENTNAME(COMPONENTNAME##ComponentData *CAMELCOMPONENTNAME##Data, hndl objectHandle); \
     hndl AttachComponent(hndl objectHandle, luabridge::LuaRef **args); \
     void DetachComponent(hndl objectHandle); \
