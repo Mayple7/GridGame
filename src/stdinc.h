@@ -42,6 +42,7 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "DebugManager.h"
 
 #include "json.h"
+#include "Math.hpp"
 
 #define EPSILON 0.0001f
 

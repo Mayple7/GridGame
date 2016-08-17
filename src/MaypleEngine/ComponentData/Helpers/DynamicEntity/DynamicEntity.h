@@ -18,21 +18,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 #include "CustomTypes.h" // Diesel engine types
 
-namespace physicsSpace
-{
-  enum Rigidbody_Type_;
-}
-
-namespace scriptSpace
-{
-  struct ScriptEntity;
-}
-
-namespace audioSpace
-{
-  class ActiveAudioEvent;
-}
-
 namespace coreSpace
 {
   class DataEntity;
@@ -46,10 +31,8 @@ namespace coreSpace
     Type_Uint64_,
     Type_Float_,
     Type_Bool_,
-    Type_Rigidbody_,
     Type_Vector_,
     Type_Matrix_,
-    Type_Script_,
     Type_Data_,
     Type_String_,
     Type_Array_
@@ -75,9 +58,7 @@ namespace coreSpace
     void Set(std::string &val);
     void Set(VectorType &val);
     void Set(MatrixType &val);
-    void Set(scriptSpace::ScriptEntity &val);
     void Set(DataEntity &val);
-    void Set(physicsSpace::Rigidbody_Type_ val);
     void Set(std::vector<DynamicEntity> &val);
 
     void Get(int32 &val) const;
@@ -89,9 +70,7 @@ namespace coreSpace
     void Get(std::string &val) const;
     void Get(VectorType &val) const;
     void Get(MatrixType &val) const;
-    void Get(scriptSpace::ScriptEntity &val) const;
     void Get(DataEntity &val) const;
-    void Get(physicsSpace::Rigidbody_Type_ &val) const;
     void Get(std::vector<DynamicEntity> &val) const;
 
     // Get the current type of the dynamic entity
@@ -109,10 +88,8 @@ namespace coreSpace
       std::string *m_stringPtr;
       VectorType *m_vectorPtr;
       MatrixType *m_matrixPtr;
-      scriptSpace::ScriptEntity *m_scriptPtr;
       DataEntity *m_dataPtr;
-      physicsSpace::Rigidbody_Type_ m_rigidBody;
-
+      
       std::vector<DynamicEntity> *m_arrayPtr;
     } m_data;
 

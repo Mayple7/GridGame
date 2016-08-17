@@ -14,8 +14,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "ProfileSample.h"
 #include "TimeManager.h"
 
-DECLARE_JOB(InitializeProfiler);
-
 namespace profilerSpace
 {
   using timeSpace::TimeManager;

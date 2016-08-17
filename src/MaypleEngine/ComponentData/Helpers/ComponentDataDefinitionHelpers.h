@@ -30,46 +30,21 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 // Specifically for previously made components(Seths)
 // Should use the START_DECLARE_COMPONENT_DEFINITION instead
 #define REGISTER_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
-DECLARE_JOB(CONCATENATE(Initialize,COMPONENTNAME,ComponentData)); \
+void CONCATENATE(Initialize,COMPONENTNAME,ComponentData)(void); \
 namespace \
 { \
   int32 s_componentIndex = componentSpace::ComponentDataLocator::RegisterComponent(CONCATENATE(Initialize,COMPONENTNAME,ComponentData)); \
 } \
-DECLARE_JOB(CONCATENATE(Initialize,COMPONENTNAME,ComponentData)) \
+void CONCATENATE(Initialize,COMPONENTNAME,ComponentData)(void) \
 { \
-  START_JOB; \
   auto *data = (NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)*)_aligned_malloc(sizeof(NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)), SIMD_ALIGNMENT); \
   new (data)NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)(); \
-  data->_PushExecutionNodes(); \
   componentSpace::ComponentDataLocator::SetDataWithIndex(data, s_componentIndex); \
-  END_JOB; \
 } \
 template <> \
 NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData) *componentSpace::ComponentDataLocator::GetData<NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData)>() \
 { \
   return static_cast<NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData) *>(componentSpace::ComponentDataLocator::GetDataWithIndex(s_componentIndex));\
-}
-
-#define SDEF_BIND(NAMESPACE, COMPONENTNAME) \
-namespace scriptSpace \
-{ \
-  COMPONENTNAME##Bind::COMPONENTNAME##Bind() {} \
-  COMPONENTNAME##Bind::~COMPONENTNAME##Bind() {} \
-  COMPONENTNAME##Bind::COMPONENTNAME##Bind(hndl newHandle) : BaseBind(newHandle) \
-  {} \
-  COMPONENTNAME##Bind::COMPONENTNAME##Bind(COMPONENTNAME##Bind const& rhs) \
-  { \
-    m_handle = rhs.m_handle; \
-  } \
-  std::string COMPONENTNAME##Bind::ToString() const \
-  { \
-    return #COMPONENTNAME + std::string(" Component"); \
-  } \
-  luabridge::LuaRef COMPONENTNAME##Bind::Lua##COMPONENTNAME##FromObject(hndl objectHandle) \
-  { \
-    int32 componentHandle = GET_COMPONENT_DATA(NAMESPACE::COMPONENTNAME##ComponentData)->GetComponent(objectHandle); \
-    return luabridge::LuaRef(GET_SCRIPT_MANAGER->m_state, COMPONENTNAME##Bind(componentHandle)); \
-  } \
 }
 
 #define DEFINE_OBJECT_TO_COMPONENT_MULTIMAP(COMPONENTNAME) \
@@ -120,17 +95,10 @@ void COMPONENTNAME##ComponentData::_UnmapObjectToMultiComponentHandle(int32 comp
 // Declares the definition part of the component
 #define START_DECLARE_COMPONENT_DEFINITION(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
 REGISTER_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
-SDEF_BIND(NAMESPACE, COMPONENTNAME) \
 namespace NAMESPACE \
 { \
-  AUTO_LUAREG_COMPONENT_CLASS(COMPONENTNAME); \
   extern int CONCATENATE(dummy, COMPONENTNAME, AutoReg) = 0; \
   int CONCATENATE(dummy, COMPONENTNAME, AutoReg2) = ++CONCATENATE(dummy, COMPONENTNAME, AutoReg); \
-  int CONCATENATE(dummy, COMPONENTNAME, StringFn) = scriptSpace::LuaDataManager::RegisterMemberFunc(#COMPONENTNAME, "__tostring", scriptSpace::AddMemberFunction < decltype(&scriptSpace::COMPONENTNAME##Bind::ToString), &scriptSpace::COMPONENTNAME##Bind::ToString > ); \
-  int CONCATENATE(dummy, COMPONENTNAME, AttachFn) = scriptSpace::LuaDataManager::RegisterAttachFunc(#COMPONENTNAME, scriptSpace::AddAttachComponent< COMPONENTNAME##ComponentData, decltype(&COMPONENTNAME##ComponentData::AttachComponent), &COMPONENTNAME##ComponentData::AttachComponent > ); \
-  int CONCATENATE(dummy, COMPONENTNAME, DetachFn) = scriptSpace::LuaDataManager::RegisterDetachFunc(#COMPONENTNAME, scriptSpace::AddDetachComponent< COMPONENTNAME##ComponentData, decltype(&COMPONENTNAME##ComponentData::DetachComponent), &COMPONENTNAME##ComponentData::DetachComponent > ); \
-  int CONCATENATE(dummy, COMPONENTNAME, LuaGetFn) = scriptSpace::LuaDataManager::RegisterLuaComponentFromObject(#COMPONENTNAME, scriptSpace::COMPONENTNAME##Bind::Lua##COMPONENTNAME##FromObject); \
-  int CONCATENATE(dummy, COMPONENTNAME, GetComFn) = scriptSpace::LuaDataManager::RegisterGetComponentHandleFunc(#COMPONENTNAME, COMPONENTNAME##ComponentData::GetComponentStatic); \
   hndl COMPONENTNAME##ComponentData::GetComponent(hndl objectHandle) \
   { \
     if (!m_objectToComponentHandle.IsAlive(objectHandle)) \
@@ -202,28 +170,10 @@ namespace NAMESPACE \
   void COMPONENTNAME##ComponentData::_Destroy##COMPONENTNAME(hndl *componentHandle) \
   { \
     Destruct##COMPONENTNAME((void*)componentHandle); \
-  } \
-  AUTO_LUAREG_COMPONENT_PROPERTY_READONLY(COMPONENTNAME, Owner); \
-  luabridge::LuaRef COMPONENTNAME##ComponentData::GetOwner(hndl componentHandle) \
-  { \
-    if (GET_COMPONENT_DATA(NAMESPACE::COMPONENTNAME##ComponentData)->GetObject(componentHandle) == INVALID_HANDLE) \
-      return luabridge::LuaRef(GET_SCRIPT_MANAGER->m_state, luabridge::Nil()); \
-    else \
-      return luabridge::LuaRef(GET_SCRIPT_MANAGER->m_state, scriptSpace::objectBinding::Obj(GET_COMPONENT_DATA(NAMESPACE::COMPONENTNAME##ComponentData)->GetObject(componentHandle))); \
   }
 
 // End of a component's definition
 #define END_DECLARE_COMPONENT_DEFINITION \
-}
-
-// Creates an execution node for a transform (name of node, variable amount of functions)
-#define REGISTER_COMPONENT_TRANSFORMS(NAME, ...) \
-{ \
-  jobSpace::DataTransform transforms[] = \
-  { \
-    __VA_ARGS__ \
-  }; \
-GET_EXECUTION_MANAGER->RegisterExecutionNode(executionSpace::ExecutionNodeConfig(NAME), transforms, sizeof(transforms) / sizeof(transforms[0])); \
 }
 
 #define ATTACH_CONSTRUCT(MEMBER, INDEX, TYPE) \

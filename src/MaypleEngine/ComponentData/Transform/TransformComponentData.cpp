@@ -17,42 +17,17 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "stdinc.h"
 
 // This component's header files
-#include "UpdateTransforms.h"
 #include "TransformComponentData.h"
 
 // Managers
 #include "ManagerLocator.h"
 #include "ObjectManager.h"
-#include "Prism.h"
-#include "WindowManager.h"
-#include "InputManager.h"
 #include "ObjectManager.h"
 #include "ObjectEntity.h"
-
-// Math libraries
-#include "VectorMath.h"
-#include "MatrixMath.h"
-#include "QuaternionMath.h"
-#include "MathConstants.h"
-#include "DieselMathGeometryUtilities.h"
-#include "DieselMathUtilities.h"
 
 // General component data
 #include "ComponentDataLocator.h"
 #include "ComponentData.h"
-#include "ModelComponentData.h"
-#include "AnimatedModelComponentData.h"
-#include "ShadowModelComponentData.h"
-#include "TranslucentModelComponentData.h"
-#include "CameraComponentData.h"
-
-// Job related
-#include "JobManager.h"
-#include "ExecutionManager.h"
-
-#include "PRenderObject.h"
-#include "PHUDObject.h"
-#include "PConstants.h"
 
 /*=================================
 *            Locals
@@ -77,8 +52,8 @@ namespace
 START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
 
   START_DECLARE_COMPONENT_CONSTRUCTION(coreSpace, Transform, transform)
-    INITIALIZE_SLOT(position, transform, math::CreateVectorType(0.0f, 0.0f, 0.0f, 1.0f));
-    INITIALIZE_SLOT(scale, transform, math::CreateVectorType(1.0f, 1.0f, 1.0f, 1.0f));
+    INITIALIZE_SLOT(position, transform, MaypleMath::CreateVectorType(0.0f, 0.0f, 0.0f, 1.0f));
+    INITIALIZE_SLOT(scale, transform, MaypleMath::CreateVectorType(1.0f, 1.0f, 1.0f, 1.0f));
     INITIALIZE_SLOT(rotation, transform);
     INITIALIZE_SLOT(rotationMatrix, transform);
     INITIALIZE_SLOT(transformMatrix, transform);
@@ -99,7 +74,7 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
   {
   }
 
-  hndl TransformComponentData::AttachComponent(hndl objectHandle, luabridge::LuaRef **args)
+  hndl TransformComponentData::AttachComponent(hndl objectHandle)
   {
     hndl newComponent = Create(objectHandle);
 
@@ -174,12 +149,6 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
   AUTO_GET_SET_PROPERTY_POINT(Transform, Position, position);
   AUTO_GET_SET_PROPERTY_POINT(Transform, Scale, scale);
 
-  // Custom rotation lua definitions
-  AUTO_LUAREG_COMPONENT_PROPERTY_VECTOR(Transform, Rotation);
-  void TransformComponentData::SetRotationLua(hndl componentHandle, const scriptSpace::vectorBinding::LuaVector &newValue)
-  {
-    SetRotation(componentHandle, math::CreateVectorType(newValue.m_vec[0], newValue.m_vec[1], newValue.m_vec[2]));
-  }
   VectorType &TransformComponentData::GetRotation(hndl componentHandle)
   {
     m_eulerAnglesContainer[componentHandle] = math::GetEulerQuaternion(m_rotationContainer[componentHandle]);
@@ -207,25 +176,6 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
   //////////////////////////////////////////////////////////////////////////
   // position offset
 
-  AUTO_LUAREG_COMPONENT_PROPERTY_VECTOR(Transform, OffsetPosition);
-  void TransformComponentData::SetOffsetPositionLua(hndl componentHandle, const scriptSpace::vectorBinding::LuaVector &newValue)
-  {
-    SetOffsetPosition(componentHandle, math::CreateVectorType(newValue.m_vec[0], newValue.m_vec[1], newValue.m_vec[2]));
-  }
-  VectorType &TransformComponentData::GetOffsetPosition(hndl componentHandle)
-  {
-    static VectorType forRef;
-
-    hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
-    if(parentObjHndl == INVALID_HANDLE || GetComponent(parentObjHndl) == INVALID_HANDLE)
-    {
-      forRef = GetPosition(componentHandle);
-      return forRef;
-    }
-
-    forRef = math::SubVectorType(GetPosition(componentHandle), GetPosition(GetComponent(parentObjHndl)));
-    return forRef;
-  }
   void VECTOR_CALL TransformComponentData::SetOffsetPosition(hndl componentHandle, VectorType newValue)
   {
     hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
@@ -255,11 +205,6 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
   //////////////////////////////////////////////////////////////////////////
   // scale offset
 
-  AUTO_LUAREG_COMPONENT_PROPERTY_VECTOR(Transform, OffsetScale);
-  void TransformComponentData::SetOffsetScaleLua(hndl componentHandle, const scriptSpace::vectorBinding::LuaVector &newValue)
-  {
-    SetOffsetScale(componentHandle, math::CreateVectorType(newValue.m_vec[0], newValue.m_vec[1], newValue.m_vec[2]));
-  }
   VectorType &TransformComponentData::GetOffsetScale(hndl componentHandle)
   {
     static VectorType forRef;
@@ -733,18 +678,4 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     m_rotationContainer[transform] = newQuaternion;
   }
 
-  // Jobs
-  void TransformComponentData::_PushExecutionNodes(void) const
-  {
-    //int dummyPropertyFn = scriptSpace::LuaDataManager::RegisterPropertyFunc("Transform", "Position", luabridge::AddPropertyComponent < decltype(&TransformComponentData::GetPosition), decltype(&TransformComponentData::SetPositionLua), scriptSpace::TransformBind, &TransformComponentData::GetPosition, &TransformComponentData::SetPositionLua> );
-
-    REGISTER_COMPONENT_TRANSFORMS("PushAliveTransformComponents", PushAliveTransforms);
-    REGISTER_COMPONENT_TRANSFORMS("UpdateTransforms", UpdateTransforms);
-
-//     auto *node0 = GET_EXECUTION_MANAGER->GetExecutionNode("PushAliveTransformComponents");
-//     GET_EXECUTION_MANAGER->AddDependency(GET_EXECUTION_MANAGER->GetRoot(), node0);
-// 
-//     auto *node1 = GET_EXECUTION_MANAGER->GetExecutionNode("UpdateTransforms");
-//     GET_EXECUTION_MANAGER->AddDependency(node0, node1);
-  }
 END_DECLARE_COMPONENT_DEFINITION

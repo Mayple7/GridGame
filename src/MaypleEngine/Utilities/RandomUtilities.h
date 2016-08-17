@@ -19,8 +19,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 /*=================================
 *         Dependencies
 */
-#include "MathConstants.h"
-#include "SimpleMath.h"
 
 /*=================================
 *      Forward Declarations

@@ -35,15 +35,15 @@ typedef FLOAT       f32;   // |32 bits|
 typedef double      f64;   // |64 bits|
 typedef uchar8     byte;   // | 8 bits|
 
-typedef __m128 VectorType; // |128 bits|
-typedef __m128i IVectorType; // For Integers
-
-typedef 
-struct ALIGN_SIMD
-{
-  __m128 rows[4];
-  operator VectorType();
-} MatrixType;              // |512 bits|
+// typedef __m128 VectorType; // |128 bits|
+// typedef __m128i IVectorType; // For Integers
+// 
+// typedef 
+// struct ALIGN_SIMD
+// {
+//   __m128 rows[4];
+//   operator VectorType();
+// } MatrixType;              // |512 bits|
 
 
 typedef int32 hndl; // A handle, used as an index

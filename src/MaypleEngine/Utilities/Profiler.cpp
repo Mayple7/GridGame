@@ -18,28 +18,12 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #define SAVE_ALL_REPORTS false
 #define MAX_SAMPLES 10000
 
-DECLARE_JOB(InitializeProfiler)
-{
-
-  START_JOB;
-
-  managerSpace::ManagerLocator::SetProfiler(new profilerSpace::Profiler(GET_TIME_MANAGER));
-
-  END_JOB;
-
-}
-
 namespace profilerSpace
 {
   Profiler::Profiler(TimeManager *timeManager) : m_timeManager(timeManager)
   {
-#ifdef _EDITOR
-    // Profiler will always be off at the start of the editor
-    m_runProfiler = false;
-#else
     // Profiler will be handled by the define
     m_runProfiler = RUN_PROFILER_ON_START;
-#endif
     m_profilerStart = false;
     m_profilerStop = false;
     m_tempFileName = "ProfilerData/temp_data.txt";
@@ -202,7 +186,7 @@ namespace profilerSpace
   {
     if(m_previousReportString.empty())
     {
-      GET_DEBUG_MANAGER->HandleWarningFailure(__FILE__, __LINE__, "%s", "No previous report to save.");
+      //GET_DEBUG_MANAGER->HandleWarningFailure(__FILE__, __LINE__, "%s", "No previous report to save.");
       return;
     }
     

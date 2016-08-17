@@ -16,7 +16,7 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "SlotMap.h"
 #include "CustomTypes.h"
 #include "ObjectEntity.h"
-//#include "ComponentData.h"
+#include "ComponentData.h"
 
 namespace objectSpace
 {

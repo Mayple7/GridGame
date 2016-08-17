@@ -20,7 +20,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 */
 #include "MacroUtilities.h"
 #undef GetObject // Stupid microsoft
-#include "LuaDataRegister.h"
 #include "ComponentDataDeclarationHelpers.h"
 #include "ComponentDataPropertyDefinitionHelpers.h"
 #include "ComponentDataDefinitionHelpers.h"

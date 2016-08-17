@@ -19,13 +19,9 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "ObjectSerialization.h" // This header file
 #include "ManagerLocator.h"      // Managers
 #include "ObjectManager.h"       // Object management
-#include "LuaDataManager.h"      // Arbitrary component and property retrieval
 #include "DynamicEntity.h"       // For grabbing any and all element types
-#include "ScriptEntity.h"        // Scripts
-#include "ActiveAudioEvents.h "  // Audio
 #include "DataEntity.h"          // User data
 #include "StringManager.h"       // String manager
-#include "KeyframeComponentData.h" // Special Serialization
 
 namespace coreSpace
 {
@@ -79,13 +75,6 @@ namespace coreSpace
     {
       DynamicJsonSet<bool>(dyn, root[name]);
     }
-    else if (dyn.Type() == Type_Rigidbody_)
-    {
-      physicsSpace::Rigidbody_Type_ val;
-      dyn.Get(val);
-
-      root["R#" + name] = Json::Value(static_cast<int32>(val));
-    }
     else if (dyn.Type() == Type_Float_)
     {
       DynamicJsonSet<f32>(dyn, root[name]);
@@ -125,21 +114,7 @@ namespace coreSpace
       {
         coreSpace::DynamicEntity& val = valArray.back();
 
-        if (val.Type() == Type_Script_)
-        {
-          Json::Value script(Json::arrayValue);
-
-          scriptSpace::ScriptEntity temp;
-          val.Get(temp);
-
-          script.append(Json::Value(temp.m_name));
-          script.append(Json::Value(temp.m_type));
-
-          container.append(script);
-
-          containerType = Type_Script_;
-        }
-        else if (val.Type() == Type_Data_)
+        if (val.Type() == Type_Data_)
         {
           Json::Value data;
 
@@ -194,31 +169,6 @@ namespace coreSpace
       else if (typeChar == 'X')
       {
         dyn.Set((static_cast<uint64>(propertyCurr[0u].asUInt()) << 32) | static_cast<uint64>(propertyCurr[1u].asUInt()));
-      }
-      // RigidbodyType
-      else if (typeChar == 'R')
-      {
-        int32 val = propertyCurr.asInt();
-        dyn.Set(static_cast<physicsSpace::Rigidbody_Type_>(val));
-      }
-      // Script
-      else if (typeChar == 'S')
-      {
-        std::vector<coreSpace::DynamicEntity> valArray;
-
-        for (uint32 i = 0; i < propertyCurr.size(); ++i)
-        {
-          scriptSpace::ScriptEntity script;
-
-          script.m_name = propertyCurr[i][0u].asString();
-          script.m_type = static_cast<scriptSpace::Script_Type_>(propertyCurr[i][1u].asInt());
-
-          coreSpace::DynamicEntity temp;
-          temp.Set(script);
-          valArray.push_back(temp);
-        }
-
-        dyn.Set(valArray);
       }
       // Data
       else if (typeChar == 'D')

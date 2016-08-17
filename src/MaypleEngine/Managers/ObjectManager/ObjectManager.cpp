@@ -17,8 +17,8 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "ManagerLocator.h"
 #include "ObjectArchetype.h"
 #include "ObjectSerialization.h"
-#include "ArchetypeStorager.h"
-#include "LevelManager.h"
+// #include "ArchetypeStorager.h"
+// #include "LevelManager.h"
 
 namespace objectSpace
 {

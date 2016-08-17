@@ -14,7 +14,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #pragma once
 
 #include "ComponentData.h"
-#include "FasterArray.h"
 
 namespace objectSpace
 {

@@ -19,6 +19,7 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 *         Dependencies
 */
 #include "MacroUtilities.h"
+#include "DynamicEntity.h"
 
 /*=================================
 *      Forward Declarations
@@ -34,21 +35,6 @@ namespace componentSpace \
   struct ComponentData; \
 } 
 
-#define BIND_COMPONENT(COMPONENTNAME) \
-namespace scriptSpace \
-{ \
-  class COMPONENTNAME##Bind : public BaseBind \
-  { \
-  public: \
-    COMPONENTNAME##Bind(); \
-    virtual ~COMPONENTNAME##Bind(); \
-    COMPONENTNAME##Bind(hndl newHandle); \
-    COMPONENTNAME##Bind(COMPONENTNAME##Bind const& rhs); \
-    std::string ToString() const; \
-    static luabridge::LuaRef COMPONENTNAME##Bind::Lua##COMPONENTNAME##FromObject(hndl component); \
-  }; \
-} \
-
 #define DECLARE_OBJECT_TO_COMPONENT_MULTI_MAP \
 dataStructures::SlotMap<dataStructures::Array<int32>> m_objectToComponentHandles; \
 dataStructures::Array<int32> m_nullObjectToComponentHandles; \
@@ -59,7 +45,6 @@ void _UnmapObjectToMultiComponentHandle(int32 componentHandle); \
 // Declares the declaration part of a component
 #define START_DECLARE_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
 FORWARD_DECLARE_COMPONENT \
-BIND_COMPONENT(COMPONENTNAME) \
 namespace NAMESPACE \
 { \
   void Initialize##COMPONENTNAME##ComponentData(); \
@@ -78,11 +63,10 @@ namespace NAMESPACE \
     static hndl GetComponentStatic(hndl objectHandle); \
     static void AddToObjectStatic(CONCATENATE(COMPONENTNAME, ComponentData) *CAMELCOMPONENTNAME##Data, hndl objectHandle, hndl componentHandle); \
     static int32 GetNumberOf##COMPONENTNAME(COMPONENTNAME##ComponentData *CAMELCOMPONENTNAME##Data, hndl objectHandle); \
-    hndl AttachComponent(hndl objectHandle, luabridge::LuaRef **args); \
+    hndl AttachComponent(hndl objectHandle); \
     void DetachComponent(hndl objectHandle); \
     void _PushExecutionNodes(void) const; \
-    dataStructures::Array<hndl> m_alive##COMPONENTNAME; \
-    luabridge::LuaRef GetOwner(hndl componentHandle); \
+    std::vector<hndl> m_alive##COMPONENTNAME; \
     void _AddToObject(hndl objectHandle, hndl componentHandle); \
 
 // End of a component's declaration
@@ -113,22 +97,18 @@ namespace NAMESPACE \
   static void ArbitrarySet##NAME(hndl componentHandle, coreSpace::DynamicEntity newValue);
 
 // Declares a getter, setter and a member container of vector type with the given name
-#define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR_FUNCTIONS(NAME) \
-  scriptSpace::vectorBinding::LuaVector Get##NAME##Lua(hndl componentHandle); \
-  void Set##NAME##Lua(hndl componentHandle, const scriptSpace::vectorBinding::LuaVector &newValue); \
-  void VECTOR_CALL Set##NAME(hndl componentHandle, VectorType CAMELNAME); \
-  VectorType &Get##NAME(hndl componentHandle); \
+#define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR3_FUNCTIONS(NAME) \
+  void Set##NAME(hndl componentHandle, Vector3 CAMELNAME); \
+  Vector3 &Get##NAME(hndl componentHandle); \
   static coreSpace::DynamicEntity ArbitraryGet##NAME(hndl componentHandle); \
   static void ArbitrarySet##NAME(hndl componentHandle, coreSpace::DynamicEntity newValue);
 
-#define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR(NAME, CAMELNAME) \
-  dataStructures::SlotMap<VectorType> m_##CAMELNAME##Container; \
-  AUTO_DECLARE_GET_SET_PROPERTY_VECTOR_FUNCTIONS(NAME); \
+#define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR3(NAME, CAMELNAME) \
+  dataStructures::SlotMap<Vector3> m_##CAMELNAME##Container; \
+  AUTO_DECLARE_GET_SET_PROPERTY_VECTOR3_FUNCTIONS(NAME); \
 
 // Declares a getter, setter and a member container of matrix type with the given name
 #define AUTO_DECLARE_GET_SET_PROPERTY_MATRIX_FUNCTIONS(NAME); \
-  scriptSpace::cframeBinding::LuaCFrame Get##NAME##Lua(hndl componentHandle); \
-  void Set##NAME##Lua(hndl componentHandle, const scriptSpace::cframeBinding::LuaCFrame &newValue); \
   void VECTOR_CALL Set##NAME(hndl componentHandle, MatrixType CAMELNAME); \
   MatrixType Get##NAME(hndl componentHandle); \
   static coreSpace::DynamicEntity ArbitraryGet##NAME(hndl componentHandle); \

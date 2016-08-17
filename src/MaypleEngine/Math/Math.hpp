@@ -13,9 +13,11 @@
 #include "Vector2.hpp"
 #include "Vector3.hpp"
 #include "Vector4.hpp"
+#include "VectorType.hpp"
 #include "Matrix2.hpp"
 #include "Matrix3.hpp"
 #include "Matrix4.hpp"
+#include "MatrixType.hpp"
 #include "Quaternion.hpp"
 #include "EulerAngles.hpp"
 #include "MathFunctions.hpp"
@@ -29,3 +31,5 @@ using MaypleMath::Matrix3;
 using MaypleMath::Matrix4;
 using MaypleMath::Quaternion;
 using MaypleMath::Plane;
+using MaypleMath::VectorType;
+using MaypleMath::MatrixType;

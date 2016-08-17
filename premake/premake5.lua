@@ -42,13 +42,6 @@ RegisterDependency("SFML",
 -- Add all other dependencies here --
 -------------------------------------
 
-RegisterDependency("Lua",
-                  {"lua51.lib"},
-                  {"lua51.lib"},
-                  {"lua/include/**"},
-                  {"lua/bin/**"},
-                  {"lua\\bin\\lua51.dll"})
-
 RegisterDependency("DbgHelp",
                   {"dbghelp.lib"},
                   {"dbghelp.lib"},
@@ -180,7 +173,6 @@ end
 RegisterExecutable("GridGame", "WindowedApp", {"SFML", "DbgHelp"})
 
 RegisterLibrary("MaypleEngine", 1)
-RegisterLibrary("LuaBridge",1)
 
 ---------------------------------------------------------------------------
 -- Functions for creating actual solution.

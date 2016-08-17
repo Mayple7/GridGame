@@ -16,9 +16,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 // This header file
 #include "DynamicEntity.h"
 
-#include "VectorMath.h"         // Vector data
-#include "MatrixMath.h"         // Matrix data
-#include "ScriptEntity.h"       // Container for da scripts
 #include "DataEntity.h"         // Container for user data
 
 // If anything needs to be cleared form the dynamic entity, this does it
@@ -29,8 +26,6 @@ else if (m_type == Type_Vector_) \
   _aligned_free(m_data.m_vectorPtr); \
 else if (m_type == Type_Matrix_) \
   _aligned_free(m_data.m_matrixPtr); \
-else if (m_type == Type_Script_) \
-  delete m_data.m_scriptPtr; \
 else if (m_type == Type_Data_) \
   delete m_data.m_dataPtr; \
 else if (m_type == Type_Array_) \
@@ -42,17 +37,11 @@ if (dynamicEntity.m_type == Type_String_) \
   m_data.m_stringPtr = new std::string(*dynamicEntity.m_data.m_stringPtr); \
 else if (dynamicEntity.m_type == Type_Vector_) \
 { \
-  m_data.m_vectorPtr = (VectorType *)_aligned_malloc(sizeof(VectorType), SIMD_ALIGNMENT); \
-  *m_data.m_vectorPtr = *dynamicEntity.m_data.m_vectorPtr; \
+  m_data.m_vectorPtr = new VectorType(*dynamicEntity.m_data.m_vectorPtr); \
 } \
 else if (dynamicEntity.m_type == Type_Matrix_) \
 { \
-  m_data.m_matrixPtr = (MatrixType *)_aligned_malloc(sizeof(MatrixType), SIMD_ALIGNMENT); \
-  *m_data.m_matrixPtr = *dynamicEntity.m_data.m_matrixPtr; \
-} \
-else if (dynamicEntity.m_type == Type_Script_) \
-{ \
-  m_data.m_scriptPtr = new scriptSpace::ScriptEntity(*dynamicEntity.m_data.m_scriptPtr); \
+  m_data.m_matrixPtr = new MatrixType(*dynamicEntity.m_data.m_matrixPtr); \
 } \
 else if (dynamicEntity.m_type == Type_Data_) \
 { \
@@ -174,10 +163,7 @@ namespace coreSpace
     CLEAR_DYNAMIC_TYPE
 
     m_type = Type_Vector_;
-    f32 valArray[4];
-    math::GetElementsVectorType(val, valArray);
-    m_data.m_vectorPtr = (VectorType *)_aligned_malloc(sizeof(VectorType), SIMD_ALIGNMENT);
-    *m_data.m_vectorPtr = math::CreateVectorType(valArray);
+    m_data.m_vectorPtr = new VectorType(val);
   }
 
   void DynamicEntity::Set(MatrixType &val)
@@ -185,26 +171,7 @@ namespace coreSpace
     CLEAR_DYNAMIC_TYPE
 
     m_type = Type_Matrix_;
-    f32 valRow1[4], valRow2[4], valRow3[4], valRow4[4];
-    math::GetRowMatrixType(val, 0, valRow1);
-    math::GetRowMatrixType(val, 1, valRow2);
-    math::GetRowMatrixType(val, 2, valRow3);
-    math::GetRowMatrixType(val, 3, valRow4);
-    m_data.m_matrixPtr = (MatrixType *)_aligned_malloc(sizeof(MatrixType), SIMD_ALIGNMENT);
-    *m_data.m_matrixPtr = math::CreateMatrixType(
-      math::CreateVectorType(valRow1),
-      math::CreateVectorType(valRow2),
-      math::CreateVectorType(valRow3),
-      math::CreateVectorType(valRow4)
-      );
-  }
-
-  void DynamicEntity::Set(scriptSpace::ScriptEntity &val)
-  {
-    CLEAR_DYNAMIC_TYPE
-
-    m_type = Type_Script_;
-    m_data.m_scriptPtr = new scriptSpace::ScriptEntity(val);
+    m_data.m_matrixPtr = new MatrixType(val);
   }
 
   void DynamicEntity::Set(DataEntity &val)
@@ -213,14 +180,6 @@ namespace coreSpace
 
     m_type = Type_Data_;
     m_data.m_dataPtr = new DataEntity(val);
-  }
-
-  void DynamicEntity::Set(physicsSpace::Rigidbody_Type_ val)
-  {
-    CLEAR_DYNAMIC_TYPE
-
-    m_type = Type_Rigidbody_;
-    m_data.m_rigidBody = val;
   }
 
   void DynamicEntity::Set(std::vector<DynamicEntity> &val)
@@ -317,9 +276,7 @@ namespace coreSpace
   {
     if (m_type == Type_Vector_)
     {
-      f32 vec[4];
-      math::GetElementsVectorType(*m_data.m_vectorPtr, vec);
-      val = math::CreateVectorType(vec);
+      val = *m_data.m_vectorPtr;
     }
   }
 
@@ -327,25 +284,7 @@ namespace coreSpace
   {
     if (m_type == Type_Matrix_)
     {
-      f32 valRow1[4], valRow2[4], valRow3[4], valRow4[4];
-      math::GetRowMatrixType(*m_data.m_matrixPtr, 0, valRow1);
-      math::GetRowMatrixType(*m_data.m_matrixPtr, 1, valRow2);
-      math::GetRowMatrixType(*m_data.m_matrixPtr, 2, valRow3);
-      math::GetRowMatrixType(*m_data.m_matrixPtr, 3, valRow4);
-      val = math::CreateMatrixType(
-        math::CreateVectorType(valRow1),
-        math::CreateVectorType(valRow2),
-        math::CreateVectorType(valRow3),
-        math::CreateVectorType(valRow4)
-        );
-    }
-  }
-
-  void DynamicEntity::Get(scriptSpace::ScriptEntity &val) const
-  {
-    if (m_type == Type_Script_)
-    {
-      val = *m_data.m_scriptPtr;
+      val = *m_data.m_matrixPtr;
     }
   }
 
@@ -354,14 +293,6 @@ namespace coreSpace
     if (m_type == Type_Data_)
     {
       val = *m_data.m_dataPtr;
-    }
-  }
-
-  void DynamicEntity::Get(physicsSpace::Rigidbody_Type_ &val) const
-  {
-    if (m_type == Type_Rigidbody_)
-    {
-      val = m_data.m_rigidBody;
     }
   }
 

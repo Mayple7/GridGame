@@ -763,14 +763,4 @@ namespace dataStructures
 	  return SlotMap<T>::const_iterator( GetCapacity(), this );
   }
 
-  template <typename T>
-  typename SlotMap<T>::iterator SlotMap<T>::insert( typename SlotMap<T>::const_iterator position, typename const SlotMap<T>::value_type& val )
-  {
-#ifdef DEBUG
-	  ERROR_IF( position != cend(), "Inserting in position is not supported, use SlotMap::end() or cend()" );
-#endif // DEBUG
-
-	  return SlotMap<T>::iterator( Insert( val ), this );
-  }
-
 } // namespace dataStructures
