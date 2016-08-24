@@ -19,11 +19,11 @@ namespace objectSpace
 {
   struct ArchetypeObjectHeader
   {
-    int numComponents;
-    int nameLength;
-    int byteLength;
+    int32 numComponents;
+    int32 nameLength;
+    int32 byteLength;
 
-    ArchetypeObjectHeader(int numComponents_ = 0, int nameLength_ = 0, int byteLength_ = 0) :
+    ArchetypeObjectHeader(int32 numComponents_ = 0, int32 nameLength_ = 0, int32 byteLength_ = 0) :
       numComponents(numComponents_),
       byteLength(byteLength_),
       nameLength(nameLength_){}
@@ -31,17 +31,17 @@ namespace objectSpace
 
   struct ArchetypeComponentHeader
   {
-    int size;
-    char type;
+    int32 size;
+    char8 type;
 
-    ArchetypeComponentHeader(int size_ = 0, componentSpace::Component_Type_ type_ = componentSpace::Component_Type_::Undefined_) :
+    ArchetypeComponentHeader(int32 size_ = 0, componentSpace::Component_Type_ type_ = componentSpace::Component_Type_::Undefined_) :
       size(size_),
       type(type_){}
   };
 
   struct ObjectArchetype
   {
-    char *data;
-    int byteSize;
+    char8 *data;
+    int32 byteSize;
   };
 }

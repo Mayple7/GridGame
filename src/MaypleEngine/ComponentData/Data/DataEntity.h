@@ -19,13 +19,13 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 namespace coreSpace
 {
-  static uint32 dataID = 0;
+  static uint64 dataID = 0;
 
   class DataEntity : public DynamicEntity
   {
   public:
-    uint32 m_name;
-    uint32 m_id;
+    uint64 m_name;
+    uint64 m_id;
 
     DataEntity() : m_name(0), m_id(0), DynamicEntity() {}
     DataEntity(DynamicEntity const& dyn) : m_name(0), m_id(0), DynamicEntity(dyn)

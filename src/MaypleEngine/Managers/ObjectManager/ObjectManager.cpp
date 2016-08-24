@@ -12,22 +12,19 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 ******************************************************************************/
 
 #include "stdinc.h"
-#include "ObjectManager.h"
-#include "ComponentDataLocator.h"
 #include "ManagerLocator.h"
+#include "ComponentDataLocator.h"
 #include "ObjectArchetype.h"
 #include "ObjectSerialization.h"
-// #include "ArchetypeStorager.h"
 // #include "LevelManager.h"
+
+void InitializeObjectManager(void)
+{
+  managerSpace::ManagerLocator::SetObjectManager(new objectSpace::ObjectManager());
+}
 
 namespace objectSpace
 {
-
-  void InitializeObjectManager(void)
-  {
-    managerSpace::ManagerLocator::SetObjectManager(new objectSpace::ObjectManager());
-  }
-
   ////////////////////////////////////////////////////////////////////////// PUBLIC
 
   // Default constructor
@@ -152,9 +149,9 @@ namespace objectSpace
 
   hndl ObjectManager::CreateObjectFromArchetype(std::string const& archetypeName, hndl parent)
   {
-    if(GET_ARCHETYPE_STORAGER->IsArchetypeExist(archetypeName) == true)
+    if(GET_ARCHETYPE_MANAGER->IsArchetypeExist(archetypeName) == true)
     {
-      const Json::Value& root = GET_ARCHETYPE_STORAGER->GetArchetype(archetypeName);
+      const Json::Value& root = GET_ARCHETYPE_MANAGER->GetArchetype(archetypeName);
 
       if(parent < 0)
         parent = m_level;
@@ -242,8 +239,8 @@ namespace objectSpace
     for (auto it = m_objectDebris.begin(); it != m_objectDebris.end(); /* Manual incrementing */ )
     {
       // Don't decrement object's time if the game is paused
-      if (!GET_LEVEL_MANAGER->IsGamePaused())
-        it->second -= deltaTime;
+//       if (!GET_LEVEL_MANAGER->IsGamePaused())
+//         it->second -= deltaTime;
       
       // Release the object if time is up
       if (it->second < 0)
@@ -395,7 +392,7 @@ namespace objectSpace
 
     Json::Reader archetypeReader;
     Json::Value readArchetype;
-    dataStructures::Array<componentSpace::ComponentData> componentDataArray;
+    std::vector<componentSpace::ComponentData> componentDataArray;
 
     archetypeReader.parse(archetypeFile,readArchetype,false);
 
@@ -409,7 +406,7 @@ namespace objectSpace
       componentSpace::ComponentData componentData = definition->m_compileFunction(*iter);
       componentData.type = definition->m_type;
 
-      componentDataArray.PushBack(componentData);
+      componentDataArray.push_back(componentData);
     }
 
     // Compute the byte size of the object
@@ -417,10 +414,10 @@ namespace objectSpace
 
     // Name length
     char const *objectName = readArchetype["Name"].asCString();
-    objectHeader.nameLength = std::strlen(objectName);
+    objectHeader.nameLength = (int32)std::strlen(objectName);
 
     // Number of components
-    objectHeader.numComponents = componentDataArray.GetSize();
+    objectHeader.numComponents = (int32)componentDataArray.size();
 
     // Tally up the header
 
@@ -430,12 +427,12 @@ namespace objectSpace
     // Size of the name
     objectHeader.byteLength += objectHeader.nameLength;
 
-    dataStructures::Array<ArchetypeComponentHeader> componentHeaders(componentDataArray.GetSize());
-    for (unsigned i = 0; i < componentDataArray.GetSize(); ++i)
+    std::vector<ArchetypeComponentHeader> componentHeaders(componentDataArray.size());
+    for (unsigned i = 0; i < componentDataArray.size(); ++i)
     {
       auto &componentData = componentDataArray[i];
       ArchetypeComponentHeader componentHeader(componentData.size, componentData.type);
-      componentHeaders.PushBack(componentHeader);
+      componentHeaders.push_back(componentHeader);
 
       // Add length of component header
       objectHeader.byteLength += sizeof(componentHeader);
@@ -461,7 +458,7 @@ namespace objectSpace
     totalBytesWritten += bytesWritten;
 
     // Write each component
-    for (unsigned i = 0; i < componentHeaders.GetSize(); ++i)
+    for (unsigned i = 0; i < componentHeaders.size(); ++i)
     {
       auto &componentHeader = componentHeaders[i];
       auto &componentData = componentDataArray[i];
@@ -478,7 +475,7 @@ namespace objectSpace
     }
 
     // Free the component data
-    for (unsigned i = 0; i < componentDataArray.GetSize(); ++i)
+    for (unsigned i = 0; i < componentDataArray.size(); ++i)
     {
       free(componentDataArray[i].data);
     }
@@ -560,13 +557,6 @@ namespace objectSpace
     // Temporary check for double freeing objects [DEBUG]
     if (m_objectList.IsAlive(objectHandle))
     {
-      // Destroy all components
-      for (auto& it = scriptSpace::LuaDataManager::GetLuaDataMap().begin(); it != scriptSpace::LuaDataManager::GetLuaDataMap().end(); ++it)
-      {
-        if (it->second.m_componentDetacher && it->second.m_componentHandle(objectHandle) != INVALID_HANDLE)
-          it->second.m_componentDetacher(objectHandle);
-      }
-
       // Recursively free all descendants
       const std::vector<hndl>& children = m_objectList[objectHandle].GetChildren();
 

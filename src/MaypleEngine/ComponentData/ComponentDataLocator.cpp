@@ -24,10 +24,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 // This file's header
 #include "ComponentDataLocator.h"
 
-#include "DebugManager.h"
-#include "ObjectManager.h"
-#include "ManagerLocator.h"
-
 
 namespace componentSpace
 {

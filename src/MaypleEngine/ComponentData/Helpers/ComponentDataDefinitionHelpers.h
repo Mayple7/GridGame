@@ -47,51 +47,6 @@ NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData) *componentSpace::ComponentDa
   return static_cast<NAMESPACE::CONCATENATE(COMPONENTNAME,ComponentData) *>(componentSpace::ComponentDataLocator::GetDataWithIndex(s_componentIndex));\
 }
 
-#define DEFINE_OBJECT_TO_COMPONENT_MULTIMAP(COMPONENTNAME) \
-dataStructures::Array<int32>& COMPONENTNAME##ComponentData::_GetColliderHandlesFromObject(int32 objectHandle) \
-{ \
-  if(objectHandle >= m_objectToComponentHandles.GetCapacity()) \
-    return m_nullObjectToComponentHandles; \
-  if(!m_objectToComponentHandles.IsAlive(objectHandle)) \
-    return m_objectToComponentHandles[objectHandle]; \
-  return m_objectToComponentHandles[objectHandle]; \
-} \
-\
-void COMPONENTNAME##ComponentData::_MapObjectToMultiComponentHandle(int32 componentHandle) \
-{ \
-  int32 objectHandle = GetObject(componentHandle); \
-  \
-  if (objectHandle >= m_objectToComponentHandles.GetCapacity()) \
-  { \
-    m_objectToComponentHandles.Expand(2 * objectHandle); \
-  } \
-  \
-  m_objectToComponentHandles[objectHandle].PushBack(componentHandle); \
-  m_objectToComponentHandles.SetAlive(objectHandle, true); \
-} \
-void COMPONENTNAME##ComponentData::_UnmapObjectToMultiComponentHandle(int32 componentHandle) \
-{ \
-  \
-  int32 objectHandle = GetObject(componentHandle); \
-  auto &objectToComponents = m_objectToComponentHandles[objectHandle]; \
-  for (unsigned i = 0; i < objectToComponents.GetSize(); ++i) \
-  { \
-    int32 handle = objectToComponents[i]; \
-    \
-    if (componentHandle == handle) \
-    { \
-      std::swap(objectToComponents[i], objectToComponents[objectToComponents.GetSize() - 1]); \
-      objectToComponents.PopBack(); \
-      break; \
-    } \
-  } \
-  \
-  if (objectToComponents.GetSize() == 0)\
-  { \
-    m_objectToComponentHandles.SetAlive(objectHandle, false); \
-  } \
-} \
-
 // Declares the definition part of the component
 #define START_DECLARE_COMPONENT_DEFINITION(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
 REGISTER_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
@@ -165,11 +120,11 @@ namespace NAMESPACE \
   } \
   void COMPONENTNAME##ComponentData::_Create##COMPONENTNAME(hndl *componentHandle) \
   { \
-    Construct##COMPONENTNAME((void *)componentHandle); \
+    Construct##COMPONENTNAME(componentHandle); \
   } \
   void COMPONENTNAME##ComponentData::_Destroy##COMPONENTNAME(hndl *componentHandle) \
   { \
-    Destruct##COMPONENTNAME((void*)componentHandle); \
+    Destruct##COMPONENTNAME(componentHandle); \
   }
 
 // End of a component's definition

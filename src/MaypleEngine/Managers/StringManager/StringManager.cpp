@@ -13,16 +13,16 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 #include "stdinc.h"
 
+#include "ManagerLocator.h"
 #include "StringManager.h"  // This file's declarations
+
+void InitializeStringManager(void)
+{
+  managerSpace::ManagerLocator::SetStringManager(new stringSpace::StringManager());
+}
 
 namespace stringSpace
 {
-
-  void InitializeStringManager(void)
-  {
-    managerSpace::ManagerLocator::SetStringManager(new stringSpace::StringManager());
-  }
-
   ////////////////////////////////////////////////////////////////////////// PUBLIC
 
   // Default constructor

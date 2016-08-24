@@ -35,13 +35,6 @@ namespace componentSpace \
   struct ComponentData; \
 } 
 
-#define DECLARE_OBJECT_TO_COMPONENT_MULTI_MAP \
-dataStructures::SlotMap<dataStructures::Array<int32>> m_objectToComponentHandles; \
-dataStructures::Array<int32> m_nullObjectToComponentHandles; \
-dataStructures::Array<int32>& _GetColliderHandlesFromObject(int32 objectHandle); \
-void _MapObjectToMultiComponentHandle(int32 componentHandle); \
-void _UnmapObjectToMultiComponentHandle(int32 componentHandle); \
-
 // Declares the declaration part of a component
 #define START_DECLARE_COMPONENT(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
 FORWARD_DECLARE_COMPONENT \
@@ -49,8 +42,8 @@ namespace NAMESPACE \
 { \
   void Initialize##COMPONENTNAME##ComponentData(); \
   extern int CONCATENATE(dummy, COMPONENTNAME, AutoReg); \
-  void Construct##COMPONENTNAME(); \
-  void Destruct##COMPONENTNAME(); \
+  void Construct##COMPONENTNAME(hndl* data); \
+  void Destruct##COMPONENTNAME(hndl* data); \
   struct COMPONENTNAME##ComponentData \
   { \
     hndl Create(hndl objectHandle); \
@@ -65,7 +58,6 @@ namespace NAMESPACE \
     static int32 GetNumberOf##COMPONENTNAME(COMPONENTNAME##ComponentData *CAMELCOMPONENTNAME##Data, hndl objectHandle); \
     hndl AttachComponent(hndl objectHandle); \
     void DetachComponent(hndl objectHandle); \
-    void _PushExecutionNodes(void) const; \
     std::vector<hndl> m_alive##COMPONENTNAME; \
     void _AddToObject(hndl objectHandle, hndl componentHandle); \
 
@@ -81,8 +73,6 @@ namespace NAMESPACE \
 #define AUTO_DECLARE_GET_SET_FUNCTIONS(TYPE, NAME) \
   void Set##NAME(hndl componentHandle, TYPE CAMELNAME); \
   TYPE Get##NAME(hndl componentHandle); \
-  static coreSpace::DynamicEntity ArbitraryGet##NAME(hndl componentHandle); \
-  static void ArbitrarySet##NAME(hndl componentHandle, coreSpace::DynamicEntity newValue);
 
 // Declares a getter, setter and a member container of the given type with the given name
 #define AUTO_DECLARE_GET_SET_PROPERTY(TYPE, NAME, CAMELNAME) \
@@ -93,15 +83,20 @@ namespace NAMESPACE \
   dataStructures::SlotMap<size_t> m_##CAMELNAME##Container; \
   void Set##NAME(hndl componentHandle, const std::string &CAMELNAME); \
   std::string const& Get##NAME(hndl componentHandle); \
-  static coreSpace::DynamicEntity ArbitraryGet##NAME(hndl componentHandle); \
-  static void ArbitrarySet##NAME(hndl componentHandle, coreSpace::DynamicEntity newValue);
+
+// Declares a getter, setter and a member container of vector type with the given name
+#define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR2_FUNCTIONS(NAME) \
+  void Set##NAME(hndl componentHandle, Vector2 CAMELNAME); \
+  Vector2 &Get##NAME(hndl componentHandle); \
+
+#define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR2(NAME, CAMELNAME) \
+  dataStructures::SlotMap<Vector2> m_##CAMELNAME##Container; \
+  AUTO_DECLARE_GET_SET_PROPERTY_VECTOR2_FUNCTIONS(NAME); \
 
 // Declares a getter, setter and a member container of vector type with the given name
 #define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR3_FUNCTIONS(NAME) \
   void Set##NAME(hndl componentHandle, Vector3 CAMELNAME); \
   Vector3 &Get##NAME(hndl componentHandle); \
-  static coreSpace::DynamicEntity ArbitraryGet##NAME(hndl componentHandle); \
-  static void ArbitrarySet##NAME(hndl componentHandle, coreSpace::DynamicEntity newValue);
 
 #define AUTO_DECLARE_GET_SET_PROPERTY_VECTOR3(NAME, CAMELNAME) \
   dataStructures::SlotMap<Vector3> m_##CAMELNAME##Container; \
@@ -109,10 +104,8 @@ namespace NAMESPACE \
 
 // Declares a getter, setter and a member container of matrix type with the given name
 #define AUTO_DECLARE_GET_SET_PROPERTY_MATRIX_FUNCTIONS(NAME); \
-  void VECTOR_CALL Set##NAME(hndl componentHandle, MatrixType CAMELNAME); \
+  void Set##NAME(hndl componentHandle, MatrixType CAMELNAME); \
   MatrixType Get##NAME(hndl componentHandle); \
-  static coreSpace::DynamicEntity ArbitraryGet##NAME(hndl componentHandle); \
-  static void ArbitrarySet##NAME(hndl componentHandle, coreSpace::DynamicEntity newValue);
 
 #define AUTO_DECLARE_GET_SET_PROPERTY_MATRIX(NAME, CAMELNAME) \
   dataStructures::SlotMap<MatrixType> m_##CAMELNAME##Container; \

@@ -27,14 +27,9 @@ namespace managerSpace
     m_stringManager = stringManager;
   }
 
-  void ManagerLocator::SetWindowManager(windowSpace::WindowManager *windowManager)
+  void ManagerLocator::SetDebugManager(debugSpace::DebugManager *debugManager)
   {
-    m_windowManager = windowManager;
-  }
-
-  void ManagerLocator::SetInputManager(inputSpace::InputManager *inputManager)
-  {
-    m_inputManager = inputManager;
+    m_debugManager = debugManager;
   }
 
   void ManagerLocator::SetObjectManager(objectSpace::ObjectManager *objectManager)
@@ -42,34 +37,14 @@ namespace managerSpace
     m_objectManager = objectManager;
   }
 
-  void ManagerLocator::SetGraphicsManager(graphicsSpace::GraphicsManager *graphicsManager)
-  {
-    m_graphicsManager = graphicsManager;
-  }
-
   void ManagerLocator::SetFileManager(fileSpace::FileManager *fileManager)
   {
     m_fileManager = fileManager;
   }
 
-  void ManagerLocator::SetMemoryManager(dataStructures::HeterogeneousAllocator *memoryManager)
+  void ManagerLocator::SetArchetypeManager(archetypeSpace::ArchetypeManager *archetypeManager)
   {
-    m_memoryManager = memoryManager;
-  }
-
-  void ManagerLocator::SetSystemManager(systemSpace::SystemManager *systemManager)
-  {
-    m_systemManager = systemManager;
-  }
-
-  void ManagerLocator::SetCameraManager(cameraSpace::CameraManager* cameraManager)
-  {
-    m_cameraManager = cameraManager;
-  }
-
-  void ManagerLocator::SetPhysicsManager(physicsSpace::PhysicsManager* physicsManager)
-  {
-    m_physicsManager = physicsManager;
+    m_archetypeManager = archetypeManager;
   }
 
   ////////////////////////////////////////////////////////////////////////// GETTERS
@@ -84,16 +59,6 @@ namespace managerSpace
     return m_stringManager;
   }
 
-  windowSpace::WindowManager* ManagerLocator::GetWindowManager(void)
-  {
-    return m_windowManager;
-  }
-
-  inputSpace::InputManager* ManagerLocator::GetInputManager(void)
-  {
-    return m_inputManager;
-  }
-
   debugSpace::DebugManager* ManagerLocator::GetDebugManager(void)
   {
     return m_debugManager;
@@ -104,42 +69,21 @@ namespace managerSpace
     return m_objectManager;
   }
 
-  graphicsSpace::GraphicsManager* ManagerLocator::GetGraphicsManager(void)
-  {
-    return m_graphicsManager;
-  }
-
   fileSpace::FileManager* ManagerLocator::GetFileManager(void)
   {
     return m_fileManager;
   }
 
-  systemSpace::SystemManager* ManagerLocator::GetSystemManager(void)
+  archetypeSpace::ArchetypeManager* ManagerLocator::GetArchetypeManager(void)
   {
-    return m_systemManager;
-  }
-
-  cameraSpace::CameraManager* ManagerLocator::GetCameraManager(void)
-  {
-    return m_cameraManager;
-  }
-
-  physicsSpace::PhysicsManager* ManagerLocator::GetPhysicsManager(void)
-  {
-    return m_physicsManager;
+    return m_archetypeManager;
   }
 
   ////////////////////////////////////////////////////////////////////////// PREDECLARATIONS
   timeSpace::TimeManager *ManagerLocator::m_timeManager = nullptr;
   stringSpace::StringManager *ManagerLocator::m_stringManager = nullptr;
-  windowSpace::WindowManager *ManagerLocator::m_windowManager = nullptr;
-  inputSpace::InputManager *ManagerLocator::m_inputManager = nullptr;
   debugSpace::DebugManager *ManagerLocator::m_debugManager = nullptr;
   objectSpace::ObjectManager *ManagerLocator::m_objectManager = nullptr;
-  graphicsSpace::GraphicsManager *ManagerLocator::m_graphicsManager = nullptr;
   fileSpace::FileManager *ManagerLocator::m_fileManager = nullptr;
-  dataStructures::HeterogeneousAllocator *ManagerLocator::m_memoryManager = nullptr;
-  systemSpace::SystemManager *ManagerLocator::m_systemManager = nullptr;
-  cameraSpace::CameraManager *ManagerLocator::m_cameraManager = nullptr;
-  physicsSpace::PhysicsManager *ManagerLocator::m_physicsManager = nullptr;
+  archetypeSpace::ArchetypeManager* ManagerLocator::m_archetypeManager = nullptr;
 }

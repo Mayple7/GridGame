@@ -23,10 +23,10 @@ GET_STRING_MANAGER->Hash(value)
 
 typedef std::unordered_map<size_t, std::string> stringmap;
 
+void InitializeStringManager(void);
+
 namespace stringSpace
 {
-  void InitializeStringManager(void);
-
   class StringManager
   {
   public:

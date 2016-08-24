@@ -21,9 +21,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 // Managers
 #include "ManagerLocator.h"
-#include "ObjectManager.h"
-#include "ObjectManager.h"
-#include "ObjectEntity.h"
 
 // General component data
 #include "ComponentDataLocator.h"
@@ -49,24 +46,124 @@ namespace
 
 ////////////////////////////////////////////////////////////////////////// DECLARATIONS
 
-START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
+//START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
+void InitializeTransformComponentData(void);
+
+namespace
+{
+  int32 s_componentIndex = componentSpace::ComponentDataLocator::RegisterComponent(InitializeTransformComponentData);
+}
+
+void InitializeTransformComponentData(void)
+{
+  auto *data = (coreSpace::CONCATENATE(Transform, ComponentData)*)malloc(sizeof(coreSpace::CONCATENATE(Transform, ComponentData)));
+  new (data)coreSpace::CONCATENATE(Transform, ComponentData)();
+  componentSpace::ComponentDataLocator::SetDataWithIndex(data, s_componentIndex);
+}
+
+template <>
+coreSpace::TransformComponentData *componentSpace::ComponentDataLocator::GetData<coreSpace::TransformComponentData>()
+{
+  return static_cast<coreSpace::TransformComponentData *>(componentSpace::ComponentDataLocator::GetDataWithIndex(s_componentIndex));
+}
+
+namespace coreSpace
+{
+  extern int TransformAutoReg = 0;
+  int TransformAutoReg2 = ++TransformAutoReg;
+  hndl TransformComponentData::GetComponent(hndl objectHandle)
+  {
+    if (!m_objectToComponentHandle.IsAlive(objectHandle))
+    {
+      return INVALID_HANDLE;
+    }
+    return m_objectToComponentHandle[objectHandle];
+  }
+
+  hndl TransformComponentData::GetObject(hndl componentHandle)
+  {
+    return m_componentToObjectHandle[componentHandle];
+  }
+
+  hndl TransformComponentData::Create(hndl objectHandle)
+  {
+    hndl componentHandle;
+    _CreateTransform(&componentHandle);
+    _AddToObject(objectHandle, componentHandle);
+    return componentHandle;
+  }
+
+  void TransformComponentData::Destroy(hndl objectHandle)
+  {
+    hndl componentHandle = GetComponent(objectHandle);
+    if (componentHandle >= 0)
+    {
+      _DestroyTransform(&componentHandle);
+      _RemoveFromObject(objectHandle, componentHandle);
+    }
+  }
+
+  int32 TransformComponentData::GetNumberOfTransform(TransformComponentData *transformData, hndl objectHandle)
+  {
+    if (transformData->m_objectToComponentHandle.IsAlive(objectHandle))
+      return 1;
+    return 0;
+  }
+
+  void TransformComponentData::_AddToObject(hndl objectHandle, hndl componentHandle)
+  {
+    if (objectHandle >= m_objectToComponentHandle.GetCapacity())
+    {
+      m_objectToComponentHandle.Expand(2 * objectHandle);
+    }
+    m_objectToComponentHandle[objectHandle] = componentHandle;
+    m_objectToComponentHandle.SetAlive(objectHandle, true);
+    if (componentHandle >= m_componentToObjectHandle.GetCapacity())
+    {
+      m_componentToObjectHandle.Expand(2 * componentHandle);
+    }
+    m_componentToObjectHandle[componentHandle] = objectHandle;
+    m_componentToObjectHandle.SetAlive(componentHandle, true);
+  }
+
+  void TransformComponentData::_RemoveFromObject(hndl objectHandle, hndl componentHandle)
+  {
+    m_objectToComponentHandle.SetAlive(objectHandle, false);
+    m_componentToObjectHandle.SetAlive(componentHandle, false);
+    m_objectToComponentHandle[objectHandle] = -1;
+    m_componentToObjectHandle[componentHandle] = -1;
+  }
+
+  hndl TransformComponentData::GetComponentStatic(hndl objectHandle)
+  {
+    return GET_COMPONENT_DATA(coreSpace::TransformComponentData)->GetComponent(objectHandle);
+  }
+
+  void TransformComponentData::AddToObjectStatic(TransformComponentData *transformData, hndl objectHandle, hndl componentHandle)
+  {
+    transformData->_AddToObject(objectHandle, componentHandle);
+  }
+
+  void TransformComponentData::_CreateTransform(hndl *componentHandle)
+  {
+    ConstructTransform(componentHandle);
+  }
+
+  void TransformComponentData::_DestroyTransform(hndl *componentHandle)
+  {
+    DestructTransform(componentHandle);
+  }
 
   START_DECLARE_COMPONENT_CONSTRUCTION(coreSpace, Transform, transform)
-    INITIALIZE_SLOT(position, transform, MaypleMath::CreateVectorType(0.0f, 0.0f, 0.0f, 1.0f));
-    INITIALIZE_SLOT(scale, transform, MaypleMath::CreateVectorType(1.0f, 1.0f, 1.0f, 1.0f));
+    INITIALIZE_SLOT(position, transform, MaypleMath::Vector2(0.0f, 0.0f));
+    INITIALIZE_SLOT(scale, transform, MaypleMath::Vector2(1.0f, 1.0f));
     INITIALIZE_SLOT(rotation, transform);
-    INITIALIZE_SLOT(rotationMatrix, transform);
-    INITIALIZE_SLOT(transformMatrix, transform);
-    INITIALIZE_SLOT(eulerAngles, transform);
   END_DECLARE_COMPONENT_CONSTRUCTION
 
   START_DECLARE_COMPONENT_DESTRUCTION(coreSpace, Transform, transform)
     UNINITIALIZE_SLOT(position, transform);
     UNINITIALIZE_SLOT(scale, transform);
     UNINITIALIZE_SLOT(rotation, transform);
-    UNINITIALIZE_SLOT(rotationMatrix, transform);
-    UNINITIALIZE_SLOT(transformMatrix, transform);
-    UNINITIALIZE_SLOT(eulerAngles, transform);
   END_DECLARE_COMPONENT_DESTRUCTION
 
   // Constructor
@@ -81,31 +178,14 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     // Check for starting values
 
     // Position
-    if (args && args[0])
-    {
-      SetPosition(newComponent, math::ToPoint4(args[0]->cast<scriptSpace::vectorBinding::LuaVector>()));
-    }
-
+    SetPosition(newComponent, Vector2(0, 0));
+    
     // Scale
-    if (args && args[1])
-    {
-      SetScale(newComponent, math::CreateVectorType(args[1]->cast<scriptSpace::vectorBinding::LuaVector>().m_vec));
-    }
-    else
-    {
-      SetScale(newComponent, math::CreateVectorType(1, 1, 1));
-    }
-
+    SetScale(newComponent, Vector2(1, 1));
+    
     // Rotation
-    if (args && args[2])
-    {
-      SetRotation(newComponent, math::ToVectorType(args[2]->cast<scriptSpace::vectorBinding::LuaVector>()));
-    }
-    else
-    {
-      SetRotation(newComponent, math::CreateVectorType(0, 0, 0, 1));
-    }
-
+    SetRotation(newComponent, 0);
+    
     return newComponent;
   }
 
@@ -114,568 +194,33 @@ START_DECLARE_COMPONENT_DEFINITION(coreSpace, Transform, transform)
     Destroy(objectHandle);
   }
 
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, Print);
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, Orbit);
-  AUTO_LUAREG_COMPONENT_REGULAR_FUNCTION(Transform, GetComponentNumber);
-
-  int TransformComponentData::GetComponentNumber()
-  {
-    return m_positionContainer.GetSize();
-  }
-
   void TransformComponentData::Print(hndl componentHandle)
   {
-    VectorFloat4 temp;
-    
-    math::StoreVectorType(GetPosition(componentHandle), &temp.x);
+    Vector2 pos = GetPosition(componentHandle);
+    std::cout << pos.x << ", " << pos.y << std::endl;
 
-    std::cout << temp.x << ", " << temp.y << ", " << temp.z << std::endl;
+    f32 rot = GetRotation(componentHandle);
+    std::cout << rot << "degrees" << std::endl;
+
+    Vector2 scale = GetScale(componentHandle);
+    std::cout << scale.x << ", " << scale.y << std::endl;
   }
 
-  float TransformComponentData::Orbit(hndl componentHandle, float time, float length, const scriptSpace::vectorBinding::LuaVector &center)
+  AUTO_GET_SET_PROPERTY_VECTOR2(Transform, Position, position);
+  AUTO_GET_SET_PROPERTY_VECTOR2(Transform, Scale, scale);
+
+  f32 TransformComponentData::GetRotation(hndl componentHandle)
   {
-    VectorFloat4 orbitPos;
-
-    orbitPos.x = std::cos(time) * length + center.Get<0>();
-    orbitPos.y = center.Get<1>();
-    orbitPos.z = std::sin(time) * length + center.Get<2>();
-    orbitPos.w = 0.0f;
-
-    SetPosition(componentHandle, orbitPos);
-
-    return std::fmodf(length + 0.004f, 2.0f);
+    return m_rotationContainer[componentHandle];
   }
-
-  AUTO_GET_SET_PROPERTY_POINT(Transform, Position, position);
-  AUTO_GET_SET_PROPERTY_POINT(Transform, Scale, scale);
-
-  VectorType &TransformComponentData::GetRotation(hndl componentHandle)
+  void TransformComponentData::SetRotation(hndl componentHandle, f32 newValue)
   {
-    m_eulerAnglesContainer[componentHandle] = math::GetEulerQuaternion(m_rotationContainer[componentHandle]);
-    return m_eulerAnglesContainer[componentHandle];
+    m_rotationContainer[componentHandle] = newValue;
   }
-  void VECTOR_CALL TransformComponentData::SetRotation(hndl componentHandle, VectorType newValue)
-  {
-    m_rotationContainer[componentHandle] = math::CreateQuaternion(newValue);
-  }
-  coreSpace::DynamicEntity TransformComponentData::ArbitraryGetRotation(hndl componentHandle)
-  {
-    coreSpace::DynamicEntity val;
-    val.Set(GET_COMPONENT_DATA(TransformComponentData)->GetRotation(componentHandle));
-    return val;
-  }
-  void TransformComponentData::ArbitrarySetRotation(hndl componentHandle, coreSpace::DynamicEntity newValue)
-  {
-    VectorType val;
-    newValue.Get(val);
-    GET_COMPONENT_DATA(TransformComponentData)->SetRotation(componentHandle, val);
-  }
-  const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "Rotation", TransformComponentData::ArbitraryGetRotation);
-  const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "Rotation", TransformComponentData::ArbitrarySetRotation);
-
-  //////////////////////////////////////////////////////////////////////////
-  // position offset
-
-  void VECTOR_CALL TransformComponentData::SetOffsetPosition(hndl componentHandle, VectorType newValue)
-  {
-    hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
-    if(parentObjHndl == INVALID_HANDLE || GetComponent(parentObjHndl) == INVALID_HANDLE)
-    {
-      SetPosition(componentHandle, newValue);
-      return;
-    }
-
-    SetPosition(componentHandle, math::AddVectorType(GetPosition(GetComponent(parentObjHndl)), newValue));
-  }
-  coreSpace::DynamicEntity TransformComponentData::ArbitraryGetOffsetPosition(hndl componentHandle)
-  {
-    coreSpace::DynamicEntity val;
-    val.Set(GET_COMPONENT_DATA(TransformComponentData)->GetOffsetPosition(componentHandle));
-    return val;
-  }
-  void TransformComponentData::ArbitrarySetOffsetPosition(hndl componentHandle, coreSpace::DynamicEntity newValue)
-  {
-    VectorType val;
-    newValue.Get(val);
-    GET_COMPONENT_DATA(TransformComponentData)->SetOffsetPosition(componentHandle, val);
-  }
-  // const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetPosition", TransformComponentData::ArbitraryGetOffsetPosition);
-  // const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetPosition", TransformComponentData::ArbitrarySetOffsetPosition);
-
-  //////////////////////////////////////////////////////////////////////////
-  // scale offset
-
-  VectorType &TransformComponentData::GetOffsetScale(hndl componentHandle)
-  {
-    static VectorType forRef;
-
-    hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
-    if(parentObjHndl == INVALID_HANDLE || GetComponent(parentObjHndl) == INVALID_HANDLE)
-    {
-      forRef = GetScale(componentHandle);
-      return forRef;
-    }
-
-    VectorFloat4 parentScale = GetScale(GetComponent(parentObjHndl));
-    VectorType scaleVec = math::CreateVectorType(1.0f / parentScale.x, 1.0f / parentScale.y, 1.0f / parentScale.z);
-    forRef = math::ScaleVectorType(GetScale(componentHandle), scaleVec);
-    return forRef;
-  }
-  void VECTOR_CALL TransformComponentData::SetOffsetScale(hndl componentHandle, VectorType newValue)
-  {
-    hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
-    if(parentObjHndl == INVALID_HANDLE || GetComponent(parentObjHndl) == INVALID_HANDLE)
-    {
-      SetScale(componentHandle, newValue);
-      return;
-    }
-
-    SetScale(componentHandle, math::ScaleVectorType(GetScale(GetComponent(parentObjHndl)), newValue));
-  }
-  coreSpace::DynamicEntity TransformComponentData::ArbitraryGetOffsetScale(hndl componentHandle)
-  {
-    coreSpace::DynamicEntity val;
-    val.Set(GET_COMPONENT_DATA(TransformComponentData)->GetOffsetScale(componentHandle));
-    return val;
-  }
-  void TransformComponentData::ArbitrarySetOffsetScale(hndl componentHandle, coreSpace::DynamicEntity newValue)
-  {
-    VectorType val;
-    newValue.Get(val);
-    GET_COMPONENT_DATA(TransformComponentData)->SetOffsetScale(componentHandle, val);
-  }
-  // const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetScale", TransformComponentData::ArbitraryGetOffsetScale);
-  // const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetScale", TransformComponentData::ArbitrarySetOffsetScale);
-
-  //////////////////////////////////////////////////////////////////////////
-  // rotation offset
-
-  AUTO_LUAREG_COMPONENT_PROPERTY_VECTOR(Transform, OffsetRotation);
-  void TransformComponentData::SetOffsetRotationLua(hndl componentHandle, const scriptSpace::vectorBinding::LuaVector &newValue)
-  {
-    SetOffsetRotation(componentHandle, math::CreateVectorType(newValue.m_vec[0], newValue.m_vec[1], newValue.m_vec[2]));
-  }
-  VectorType &TransformComponentData::GetOffsetRotation(hndl componentHandle)
-  {
-    static VectorType forRef;
-
-    hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
-    if(parentObjHndl == INVALID_HANDLE || GetComponent(parentObjHndl) == INVALID_HANDLE)
-    {
-      forRef = GetRotation(componentHandle);
-      return forRef;
-    }
-
-    forRef = math::ScaleVectorType(GetRotation(componentHandle), GetRotation(GetComponent(parentObjHndl)));
-    return forRef;
-  }
-  void VECTOR_CALL TransformComponentData::SetOffsetRotation(hndl componentHandle, VectorType newValue)
-  {
-    hndl parentObjHndl = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetParent();
-    if(parentObjHndl == INVALID_HANDLE || GetComponent(parentObjHndl) == INVALID_HANDLE)
-    {
-      SetRotation(componentHandle, newValue);
-      return;
-    }
-
-    // SetRotation(componentHandle, math::ScaleVectorType(GetRotation(GetComponent(parentObjHndl)), newValue));
-  }
-  coreSpace::DynamicEntity TransformComponentData::ArbitraryGetOffsetRotation(hndl componentHandle)
-  {
-    coreSpace::DynamicEntity val;
-    val.Set(GET_COMPONENT_DATA(TransformComponentData)->GetOffsetRotation(componentHandle));
-    return val;
-  }
-  void TransformComponentData::ArbitrarySetOffsetRotation(hndl componentHandle, coreSpace::DynamicEntity newValue)
-  {
-    VectorType val;
-    newValue.Get(val);
-    GET_COMPONENT_DATA(TransformComponentData)->SetOffsetRotation(componentHandle, val);
-  }
-  // const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "OffsetRotation", TransformComponentData::ArbitraryGetOffsetRotation);
-  // const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "OffsetRotation", TransformComponentData::ArbitrarySetOffsetRotation);
-
-  //////////////////////////////////////////////////////////////////////////
-  // offset helper functions
-
-  void coreSpace::TransformComponentData::TransformTranslationOffset(hndl componentHandle, VectorType newPos, uint32 depth /*= 0*/)
-  {
-    if (depth >= c_translationOffsetMaxDepth)
-    {
-      TRACE_ERROR(NULL,
-                  "This component seems to have infinite children: %d", componentHandle);
-      return;
-    }
-    VectorType dt = math::SubVectorType(newPos, GetPosition(componentHandle));
-    SetPosition(componentHandle, newPos);
-
-    auto& children = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetChildren();
-
-    if(children.empty() == true)
-    {
-      return;
-    }
-
-    for(hndl childHndl : children)
-    {
-      hndl transformHndl = GetComponent(childHndl);
-
-      TRACE_ERROR(transformHndl != componentHandle,
-                  "How can you have yourself as a parent something is seriously wrong.");
-      TransformTranslationOffset(transformHndl, math::AddVectorType(GetPosition(transformHndl), dt), depth + 1);
-    }
-  }
-
-  void coreSpace::TransformComponentData::TransformScaleOffset(hndl componentHandle, VectorType newScale, VectorType anchor)
-  {
-    VectorType scaleVec = math::CreateVectorType(1.0f / GetScale(componentHandle).m128_f32[0], 1.0f / GetScale(componentHandle).m128_f32[1], 1.0f / GetScale(componentHandle).m128_f32[2]);
-    VectorType scaleDt = math::ScaleVectorType(newScale, scaleVec);
-    VectorType relativeToAnchorVector = math::SubVectorType(GetPosition(componentHandle), anchor);
-    relativeToAnchorVector = math::ScaleVectorType(relativeToAnchorVector, scaleDt);
-
-    TransformScaleOffsetHelper(componentHandle, scaleDt, anchor);
-  }
-
-  void coreSpace::TransformComponentData::TransformScaleOffsetHelper(hndl componentHandle, VectorType scaleDt, VectorType anchor)
-  {
-    VectorType relativeToAnchorVector = math::SubVectorType(GetPosition(componentHandle), anchor);
-    relativeToAnchorVector = math::ScaleVectorType(relativeToAnchorVector, scaleDt);
-    SetPosition(componentHandle, math::ToPoint4(math::AddVectorType(anchor, relativeToAnchorVector)));
-    SetScale(componentHandle, math::ScaleVectorType(GetScale(componentHandle), scaleDt));
-
-    auto& children = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetChildren();
-
-    if(children.empty() == true)
-    {
-      return;
-    }
-
-    for(hndl childHndl : children)
-    {
-      TransformScaleOffsetHelper(GetComponent(childHndl), scaleDt, anchor);
-    }
-  }
-
-  void coreSpace::TransformComponentData::TransformRotateOffset(hndl componentHandle, VectorType newRotEuler, VectorType anchor)
-  {
-    VectorType rotDt = math::SubVectorType(newRotEuler, GetRotation(componentHandle));
-    TransformRotateOffsetHelper(componentHandle, rotDt, anchor);
-  }
-
-  void coreSpace::TransformComponentData::TransformRotateOffsetHelper(hndl componentHandle, VectorType rotDt, VectorType anchor)
-  {
-    MatrixType initialRotMat = math::CreateMatrixTypeFromEuler(GetRotation(componentHandle));
-    MatrixType relativeOffsetPosMat = math::CreateTranslationMatrixType(math::SubVectorType(GetPosition(componentHandle), anchor));
-    MatrixType deltaRotMat = math::CreateMatrixTypeFromEuler(rotDt);
-
-    MatrixType result = MxM(MxM(deltaRotMat, relativeOffsetPosMat), initialRotMat);
-
-    SetPosition(componentHandle, math::ToPoint4(math::AddVectorType(math::GetColumnMatrixType(result, 3), anchor)));
-    GET_TRANSFORM_DATA->m_rotationContainer[componentHandle] = (componentHandle, math::CreateQuaternion(result));
-
-    auto& children = GET_OBJECT_MANAGER->GetObject(GetObject(componentHandle)).GetChildren();
-
-    if(children.empty() == true)
-    {
-      return;
-    }
-
-    for(hndl childHndl : children)
-    {
-      TransformRotateOffsetHelper(GetComponent(childHndl), rotDt, anchor);
-    }
-  }
-
-  ////////////////////////////////////////////////////////////////////////// CFRAME
-
-  AUTO_LUAREG_COMPONENT_PROPERTY_MATRIX(Transform, CFrame);
-  void TransformComponentData::SetCFrameLua(hndl componentHandle, const scriptSpace::cframeBinding::LuaCFrame &newValue)
-  {
-    SetCFrame(componentHandle, newValue);
-  }
-  scriptSpace::cframeBinding::LuaCFrame TransformComponentData::GetCFrameLua(hndl componentHandle)
-  {
-    return scriptSpace::cframeBinding::LuaCFrame(GetCFrame(componentHandle));
-  }
-  MatrixType TransformComponentData::GetCFrame(hndl componentHandle)
-  {
-    MatrixType val = math::MatrixTypeMultMatrixType(math::CreateTranslationMatrixType(GetPosition(componentHandle)), math::CreateMatrixType(m_rotationContainer.GetByValue(componentHandle)));
-    return val;
-  }
-  void VECTOR_CALL TransformComponentData::SetCFrame(hndl componentHandle, MatrixType newValue)
-  {
-    m_rotationContainer[componentHandle] = math::CreateQuaternion(newValue);
-    m_positionContainer[componentHandle] = math::GetColumnMatrixType(newValue, 3);
-  }
-  coreSpace::DynamicEntity TransformComponentData::ArbitraryGetCFrame(hndl componentHandle)
-  {
-    coreSpace::DynamicEntity val;
-    val.Set(GET_COMPONENT_DATA(TransformComponentData)->GetCFrame(componentHandle));
-    return val;
-  }
-  void TransformComponentData::ArbitrarySetCFrame(hndl componentHandle, coreSpace::DynamicEntity newValue)
-  {
-    MatrixType val;
-    newValue.Get(val);
-    GET_COMPONENT_DATA(TransformComponentData)->SetCFrame(componentHandle, val);
-  }
-  const int32 CONCATENATE(c_propertyGet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertyGetter("Transform", "CFrame", TransformComponentData::ArbitraryGetCFrame);
-  const int32 CONCATENATE(c_propertySet, __COUNTER__) = scriptSpace::LuaDataManager::RegisterArbitraryPropertySetter("Transform", "CFrame", TransformComponentData::ArbitrarySetCFrame);
-
-  ////////////////////////////////////////////////////////////////////////// BASIS
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, GetExtentScalar);
-  VectorType TransformComponentData::GetExtentScalar(hndl componentHandle)
-  {
-    hndl objectHandle = GetObject(componentHandle);
-
-    auto *modelComponentData = GET_COMPONENT_DATA(prism::ModelComponentData);
-    hndl modelComponent = modelComponentData->GetComponent(objectHandle);
-
-    if (modelComponent != INVALID_HANDLE)
-    {
-      auto extent = modelComponentData->m_modelContainer[modelComponent]->m_extentScalar;
-      return math::CreateVectorType(extent.x, extent.y, extent.z,0.0f); 
-    }
-
-    auto *animatedModelComponentData = GET_COMPONENT_DATA(prism::AnimatedModelComponentData);
-    hndl animatedModelComponent = animatedModelComponentData->GetComponent(objectHandle);
-    if (animatedModelComponent != INVALID_HANDLE)
-    {
-      auto extent = animatedModelComponentData->m_modelContainer[animatedModelComponent]->m_extentScalar;
-      return math::CreateVectorType(extent.x, extent.y, extent.z,0.0f);
-    }
-
-    auto *translucentModelComponentData = GET_COMPONENT_DATA(prism::TranslucentModelComponentData);
-    hndl translucentModelComponent = translucentModelComponentData->GetComponent(objectHandle);
-    if(translucentModelComponent != INVALID_HANDLE)
-    {
-      auto extent = translucentModelComponentData->m_modelContainer[translucentModelComponent]->m_extentScalar;
-      return math::CreateVectorType(extent.x, extent.y, extent.z, 0.0f);
-    }
-    return math::CreateVectorType(1.0f, 1.0f, 1.0f, 0.0f);
-  }
-
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, GetXBasis);
-  VectorType TransformComponentData::GetXBasis(hndl componentHandle) const
-  {
-    MatrixType basis = math::CreateMatrixType(m_rotationContainer.GetByValue(componentHandle));
-    return math::GetColumnMatrixType(basis, 0);
-  }
-
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, GetYBasis);
-  VectorType TransformComponentData::GetYBasis(hndl componentHandle) const
-  {
-    MatrixType basis = math::CreateMatrixType(m_rotationContainer.GetByValue(componentHandle));
-    return math::GetColumnMatrixType(basis, 1);
-  }
-
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, GetZBasis);
-  VectorType TransformComponentData::GetZBasis(hndl componentHandle) const
-  {
-    MatrixType basis = math::CreateMatrixType(m_rotationContainer.GetByValue(componentHandle));
-    return math::GetColumnMatrixType(basis, 2);
-  }
-
   
-  prism::PAABB TransformComponentData::GetAABB(hndl componentHandle) 
+  Matrix3 TransformComponentData::_CalculateTransform(hndl componentHandle)
   {
-    TRACE_ERROR(m_rotationMatrixContainer.IsAlive(componentHandle),
-                "This component handle isn't alive");
-    // We are retrieving the extent scalar converting it and the scale to a half vector
-    // We then rotate the half vector to get the correct aabb
-    VectorType extentScalar = math::InverseVectorType(math::ToPoint4(GetExtentScalar(componentHandle)));
-    VectorType scaledExtentScalar = math::ScaleVectorType(math::ScaleVectorType(m_scaleContainer[componentHandle], 0.5f), extentScalar);
-    scaledExtentScalar = math::AbsoluteValueVectorType(scaledExtentScalar);
-    MatrixType rotation = m_rotationMatrixContainer[componentHandle];
-    //MatrixType rotation = math::CreateMatrixType(m_rotationContainer[componentHandle]);
-    
-
-    // faster than multiply 9 vectors by rotation and retrieving the length and adding them
-    VectorType r0 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[0]), scaledExtentScalar);
-    VectorType r1 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[1]), scaledExtentScalar);
-    VectorType r2 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[2]), scaledExtentScalar);
-
-    // construct a vector from the dot products
-    VectorType shuffle0 = _mm_shuffle_ps(r0, r1, _MM_SHUFFLE(0, 0, 0, 0)); // r0.x, r0.x, r1.x, r1.x
-    VectorType finalShuffle = _mm_shuffle_ps(shuffle0, r2, _MM_SHUFFLE(0, 0, 2, 0)); // s0.x, s0.z, r2.x, r2.x
-    finalShuffle = math::ToVectorType(finalShuffle);
-
-
-    return prism::PAABB(m_positionContainer[componentHandle], math::ToVectorType(finalShuffle));
-  }
-
-  prism::PAABB TransformComponentData::GetAABBRaw(hndl componentHandle)
-  {
-    TRACE_ERROR(m_rotationMatrixContainer.IsAlive(componentHandle),
-                "This component handle isn't alive");
-    // We are retrieving the extent scalar converting it and the scale to a half vector
-    // We then rotate the half vector to get the correct aabb
-    VectorType extentScalar = math::InverseVectorType(math::ToPoint4(GetExtentScalar(componentHandle)));
-    VectorType scaledExtentScalar = math::ScaleVectorType(math::ScaleVectorType(m_scaleContainer[componentHandle], 0.5f), extentScalar);
-    scaledExtentScalar = math::AbsoluteValueVectorType(scaledExtentScalar);
-    //MatrixType rotation = m_rotationMatrixContainer[componentHandle];
-    MatrixType rotation = math::CreateMatrixType(m_rotationContainer[componentHandle]);
-    
-
-    // faster than multiply 9 vectors by rotation and retrieving the length and adding them
-    VectorType r0 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[0]), scaledExtentScalar);
-    VectorType r1 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[1]), scaledExtentScalar);
-    VectorType r2 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[2]), scaledExtentScalar);
-
-    // construct a vector from the dot products
-    VectorType shuffle0 = _mm_shuffle_ps(r0, r1, _MM_SHUFFLE(0, 0, 0, 0)); // r0.x, r0.x, r1.x, r1.x
-    VectorType finalShuffle = _mm_shuffle_ps(shuffle0, r2, _MM_SHUFFLE(0, 0, 2, 0)); // s0.x, s0.z, r2.x, r2.x
-    finalShuffle = math::ToVectorType(finalShuffle);
-
-
-    return prism::PAABB(m_positionContainer[componentHandle], math::ToVectorType(finalShuffle));
-  }
-
-  prism::PAABB TransformComponentData::GetAABB(hndl componentHandle, float radius)
-  {
-    // We are retrieving the extent scalar converting it and the scale to a half vector
-    // We then rotate the half vector to get the correct aabb
-    VectorType scaledExtentScalar = math::CreateVectorType(radius);
-    MatrixType rotation = m_rotationMatrixContainer[componentHandle];
-
-    // faster than multiply 9 vectors by rotation and retrieving the length and adding them
-    VectorType r0 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[0]), scaledExtentScalar);
-    VectorType r1 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[1]), scaledExtentScalar);
-    VectorType r2 = math::DotVectorType(math::AbsoluteValueVectorType(rotation.rows[2]), scaledExtentScalar);
-
-    // construct a vector from the dot products
-    VectorType shuffle0 = _mm_shuffle_ps(r0, r1, _MM_SHUFFLE(0, 0, 0, 0)); // r0.x, r0.x, r1.x, r1.x
-    VectorType finalShuffle = _mm_shuffle_ps(shuffle0, r2, _MM_SHUFFLE(0, 0, 2, 0)); // s0.x, s0.z, r2.x, r2.x
-
-
-    //return prism::PAABB(m_positionContainer[componentHandle], finalShuffle);
-    return prism::PAABB(m_positionContainer[componentHandle], math::ToVectorType(finalShuffle));
-  }
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, RotateToVector);
-  void TransformComponentData::RotateToVector(hndl componentHandle, scriptSpace::vectorBinding::LuaVector const &vector)
-  {
-    RotateToVectorDetail(componentHandle, math::CreateVectorType(vector.m_vec[0], vector.m_vec[1], vector.m_vec[2], 0.0f));
-  }
-
-  void VECTOR_CALL TransformComponentData::RotateToVectorDetail(hndl componentHandle, VectorType vector)
-  {
-    VectorType crossed = math::CrossVectorType(math::g_worldY, math::NormalizeVectorType(vector));
-
-    float sinTheta = math::MagnitudeVectorTypeScalar(crossed);
-
-    float angle = std::asin(sinTheta);
-
-    m_rotationContainer[componentHandle] = math::CreateQuaternion(math::NormalizeVectorType(crossed), angle * RADIANS_TO_DEGREES);
-  }
-
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, Rotate);
-  void TransformComponentData::Rotate(hndl componentHandle, scriptSpace::cframeBinding::LuaCFrame const &quat)
-  {
-    VectorType deltaQuaternion = quat.ToVector();
-    _Rotate(componentHandle, deltaQuaternion);
-  }
-
-  void VECTOR_CALL TransformComponentData::_Rotate(hndl componentHandle, VectorType quat)
-  {
-    VectorType newQuaternion = math::NormalizeVectorType(math::QuaternionMultQuaternion(m_rotationContainer.GetByValue(componentHandle), quat));
-    m_rotationContainer[componentHandle] = newQuaternion;
-  }
-  unsigned TransformComponentData::Extract(prism::PRenderObject *objects, 
-                                           const hndl *objectHandles, 
-                                           size_t *objectTypes, 
-                                           unsigned size)
-  {
-    unsigned i = 0;
-    // Retrieve the transform data
-    for (; i < size; ++i)
-    {
-      hndl component = GetComponent(objectHandles[i]);
-
-      TRACE_ERROR(component != INVALID_HANDLE,
-                  "Shouldn't have a render object without a transform.");
-
-      
-      _ExtractObject(&objects[i], &objectTypes[i], component);
-    }
-
-    return i;
-  }
-
-  unsigned TransformComponentData::Extract(prism::PAnimatedRenderObject *objects, 
-                                           const hndl *objectHandles, 
-                                           size_t *objectTypes, 
-                                           unsigned size)
-  {
-    unsigned i = 0;
-    // Retrieve the transform data
-    for (; i < size; ++i)
-    {
-      hndl component = GetComponent(objectHandles[i]);
-
-      if(component == INVALID_HANDLE)
-        continue;
-//       TRACE_ERROR(component != INVALID_HANDLE,
-//                   "Shouldn't have a render object without a transform.");
-
-      
-      _ExtractObject(&objects[i], &objectTypes[i], component);
-    }
-
-    return i;
-  }
-
-  void TransformComponentData::_ExtractObject(prism::PRenderObject *object,
-                                                  size_t *objectType,
-                                                  size_t componentHandle)
-  {
-    math::GetMatrixType(m_transformMatrixContainer[componentHandle], &object->m_objData.g_world);
-    math::GetMatrixType(m_rotationMatrixContainer[componentHandle], &object->m_objData.g_rotation);
-  }
-
-  MatrixType TransformComponentData::_CalculateTransform(hndl transform)
-  {
-    MatrixType trans = math::CreateTranslationMatrixType(m_positionContainer[transform]);
-    VectorType quat = m_rotationContainer[transform];
-    MatrixType rot = math::CreateMatrixType(quat);
-    MatrixType scale = math::CreateScaleMatrixType(m_scaleContainer[transform]);
-    MatrixType result = MxM(trans, MxM(rot, scale));
-    return result;
-  }
-
-  AUTO_LUAREG_COMPONENT_MEMBER_FUNCTION(Transform, AlignBasis);
-  void TransformComponentData::AlignBasis(hndl transform, int32 basis, scriptSpace::vectorBinding::LuaVector const &vector)
-  {
-    _AlignBasis(transform, basis, vector, m_rotationContainer.GetByValue(transform));
-  }
-
-  void VECTOR_CALL TransformComponentData::_AlignBasis(hndl transform, int32 basis, VectorType vector, VectorType initialOrientation)
-  {
-    MatrixType rotMat = math::CreateMatrixType(initialOrientation);
-    VectorType basisVector = math::GetColumnMatrixType(rotMat, basis % 3);
-
-    if (math::IsEqualVectorType(basisVector, vector))
-      return;
-
-    if (basis > 2)
-      basisVector = math::NegateVectorType(basisVector);
-
-    VectorType cross = math::CrossVectorType(vector, basisVector);
-
-    if (math::IsEqualVectorType(cross, math::g_vector4Zero))
-    {
-      if (basis != 1 && basis != 4)
-        cross = math::g_worldY;
-      else
-        cross = math::g_worldX;
-    }
-    cross = math::NormalizeVectorType(cross);
-
-    f32 theta = math::AngleBetween(vector, basisVector);
-
-    VectorType deltaQuat = math::CreateQuaternion(cross, theta);
-
-    VectorType newQuaternion = math::NormalizeVectorType(math::QuaternionMultQuaternion(initialOrientation, deltaQuat));
-    m_rotationContainer[transform] = newQuaternion;
+    return BuildTransform(m_positionContainer[componentHandle], m_rotationContainer[componentHandle], m_scaleContainer[componentHandle]);
   }
 
 END_DECLARE_COMPONENT_DEFINITION

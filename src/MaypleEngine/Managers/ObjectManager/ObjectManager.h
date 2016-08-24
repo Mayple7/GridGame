@@ -18,11 +18,10 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 #include "ObjectEntity.h"
 #include "ComponentData.h"
 
+void InitializeObjectManager(void);
+
 namespace objectSpace
 {
-
-  void InitializeObjectManager(void);
-
   // The manager structure
   class ObjectManager
   {
@@ -46,7 +45,7 @@ namespace objectSpace
     void ClearDebris(f32 deltaTime);
 
     // Gets the object by reference using the object's handle
-    Object &GetObject(hndl objectHandle);
+    objectSpace::Object &GetObject(hndl objectHandle);
 
     // Checks to see whether or not a certain object exists
     bool IsAlive(hndl objectHandle) const;

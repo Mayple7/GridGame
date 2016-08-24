@@ -13,9 +13,7 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 #include "stdinc.h"         // Precompiled header
 #include "ObjectEntity.h"   // This file's declarations
-#include "ObjectManager.h"  // The manager of the objects
 #include "ManagerLocator.h" // For getting the object manager
-#include "StringManager.h"  // Hashing
 
 namespace objectSpace
 {

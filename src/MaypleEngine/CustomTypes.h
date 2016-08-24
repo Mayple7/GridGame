@@ -13,7 +13,6 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 #pragma once
 
-#define VECTOR_CALL    __vectorcall
 #define RESTRICT       __declspec(restrict)
 #define SIMD_ALIGNMENT 16
 #define ALIGN_SIMD     __declspec(align(SIMD_ALIGNMENT))

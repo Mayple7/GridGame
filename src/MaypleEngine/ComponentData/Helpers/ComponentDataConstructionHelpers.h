@@ -30,9 +30,8 @@ written consent of DigiPen Institute of Technology is prohibited. </b>
 
 // Declares the declaration part of a component's construction
 #define START_DECLARE_COMPONENT_CONSTRUCTION(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
-void Construct##COMPONENTNAME() \
+void Construct##COMPONENTNAME(hndl* data) \
 { \
-  hndl *data = (hndl *)lpParam; \
   auto *CAMELCOMPONENTNAME##ComponentData = componentSpace::ComponentDataLocator::GetData<COMPONENTNAME##ComponentData>(); \
   hndl _openSlot = 0xFFFFFFFF; \
   hndl _newSlot =  0x00000000;
@@ -60,9 +59,8 @@ _openSlot = _newSlot;
 
 // Declares the declaration part of a component's destruction
 #define START_DECLARE_COMPONENT_DESTRUCTION(NAMESPACE, COMPONENTNAME, CAMELCOMPONENTNAME) \
-void Destruct##COMPONENTNAME() \
+void Destruct##COMPONENTNAME(hndl* data) \
 { \
-  hndl *data = (hndl *)lpParam; \
   auto *CAMELCOMPONENTNAME##ComponentData = componentSpace::ComponentDataLocator::GetData<COMPONENTNAME##ComponentData>();
 
 // End of a component's declaration of destruction
